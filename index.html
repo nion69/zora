@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zora AI — License Panel</title>
+<meta name="description" content="Zora AI License Key Management Dashboard">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#000;
+  --white:#fff;
+  --gray-950:#080808;
+  --gray-900:#111;
+  --gray-800:#1a1a1a;
+  --gray-700:#252525;
+  --gray-600:#333;
+  --gray-500:#555;
+  --gray-400:#888;
+  --gray-300:#aaa;
+  --gray-200:#ccc;
+  --gray-100:#e8e8e8;
+  --accent:#e2e2e2;
+  --border:rgba(255,255,255,0.07);
+  --border-hover:rgba(255,255,255,0.15);
+  --green:#22c55e;
+  --red:#ef4444;
+  --amber:#f59e0b;
+  --blue:#3b82f6;
+  --r:10px;--rs:6px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--gray-950);color:var(--white);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ANIMATED GRID BG */
+#grid-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.35}
+
+/* GLOW SPOTS */
+.glow-spot{position:fixed;border-radius:50%;filter:blur(140px);pointer-events:none;z-index:0}
+.glow-spot-1{width:500px;height:500px;background:rgba(255,255,255,0.025);top:-100px;left:-100px}
+.glow-spot-2{width:400px;height:400px;background:rgba(255,255,255,0.015);bottom:-100px;right:-100px}
+
+.app{position:relative;z-index:1}
+
+/* ── LOGIN ─────────────────────────────────── */
+#page-login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+
+.login-card{
+  width:100%;max-width:420px;
+  background:var(--gray-900);
+  border:1px solid var(--border-hover);
+  border-radius:16px;
+  padding:52px 44px;
+  position:relative;
+  overflow:hidden;
+  animation:fadeUp .5s ease both;
+}
+.login-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent);
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* Logo mark */
+.logo-mark{
+  width:56px;height:56px;margin:0 auto 28px;
+  position:relative;display:block;
+}
+.logo-mark svg{width:100%;height:100%}
+
+.login-title{
+  text-align:center;font-size:22px;font-weight:700;
+  letter-spacing:3px;text-transform:uppercase;
+  color:var(--white);margin-bottom:6px;
+}
+.login-sub{text-align:center;color:var(--gray-400);font-size:13px;margin-bottom:40px;letter-spacing:.5px}
+
+.field{margin-bottom:18px}
+.field label{display:block;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray-400);margin-bottom:8px}
+.input-wrap{position:relative}
+.input-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--gray-500);pointer-events:none;display:flex;align-items:center}
+.input-ctrl{
+  width:100%;padding:13px 14px 13px 42px;
+  background:var(--gray-800);
+  border:1px solid var(--border);
+  border-radius:var(--rs);
+  color:var(--white);font-size:14px;font-family:'Inter',sans-serif;
+  outline:none;transition:border-color .2s,box-shadow .2s;
+}
+.input-ctrl:focus{border-color:rgba(255,255,255,0.35);box-shadow:0 0 0 3px rgba(255,255,255,0.06)}
+.input-ctrl::placeholder{color:var(--gray-600)}
+
+.btn-login{
+  width:100%;padding:13px;
+  background:var(--white);color:var(--black);
+  font-family:'Inter',sans-serif;font-size:14px;font-weight:700;
+  letter-spacing:.5px;border:none;border-radius:var(--rs);
+  cursor:pointer;transition:all .2s;
+  position:relative;overflow:hidden;
+}
+.btn-login:hover{background:var(--gray-100);transform:translateY(-1px);box-shadow:0 8px 24px rgba(255,255,255,0.12)}
+.btn-login:active{transform:translateY(0)}
+.btn-login::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,0);transition:background .15s}
+.btn-login:hover::after{background:rgba(0,0,0,0.04)}
+
+.login-footer{text-align:center;margin-top:24px;font-size:11px;color:var(--gray-600);letter-spacing:.5px}
+
+/* ── DASHBOARD LAYOUT ──────────────────────── */
+#page-dashboard{display:none;min-height:100vh}
+.layout{display:flex}
+
+/* Sidebar */
+.sidebar{
+  width:220px;min-height:100vh;
+  background:rgba(10,10,10,0.95);
+  border-right:1px solid var(--border);
+  position:fixed;top:0;left:0;bottom:0;z-index:100;
+  display:flex;flex-direction:column;padding:24px 12px;
+}
+.sidebar-brand{display:flex;align-items:center;gap:10px;padding:0 10px;margin-bottom:32px}
+.brand-icon{
+  width:32px;height:32px;border:1px solid rgba(255,255,255,0.2);
+  border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.brand-icon svg{width:16px;height:16px}
+.brand-name{font-size:14px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--white)}
+.brand-ver{font-size:10px;color:var(--gray-500);letter-spacing:1px}
+
+.nav-section{font-size:10px;font-weight:600;letter-spacing:1.5px;color:var(--gray-600);text-transform:uppercase;padding:0 10px;margin-bottom:6px}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:var(--rs);
+  color:var(--gray-400);cursor:pointer;font-size:13px;font-weight:500;
+  transition:all .18s;margin-bottom:2px;
+  border:1px solid transparent;
+}
+.nav-item:hover{color:var(--white);background:var(--gray-800)}
+.nav-item.active{color:var(--white);background:var(--gray-800);border-color:var(--border-hover)}
+.nav-icon{width:16px;height:16px;flex-shrink:0;opacity:.7}
+.nav-item.active .nav-icon{opacity:1}
+.sidebar-spacer{flex:1}
+.sidebar-logout{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--rs);
+  color:var(--gray-400);cursor:pointer;font-size:13px;font-weight:500;
+  transition:all .18s;border:1px solid transparent;
+}
+.sidebar-logout:hover{color:#fca5a5;background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.2)}
+
+/* Main */
+.main{margin-left:220px;flex:1;padding:32px 36px;min-height:100vh}
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:36px;padding-bottom:24px;border-bottom:1px solid var(--border)}
+.topbar-title{font-size:24px;font-weight:700;letter-spacing:-.5px}
+.topbar-sub{color:var(--gray-400);font-size:13px;margin-top:4px;font-weight:400}
+.status-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 14px;border-radius:99px;font-size:12px;font-weight:600;
+  background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);color:var(--green);
+}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:livePulse 2s ease infinite}
+@keyframes livePulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.stat-card{
+  background:var(--gray-900);border:1px solid var(--border);
+  border-radius:var(--r);padding:20px 22px;
+  position:relative;overflow:hidden;
+  transition:border-color .2s,transform .2s;
+  cursor:default;
+}
+.stat-card:hover{border-color:var(--border-hover);transform:translateY(-2px)}
+.stat-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.stat-card-label{font-size:11px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--gray-500)}
+.stat-card-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:var(--gray-800)}
+.stat-card-icon svg{width:14px;height:14px}
+.stat-value{font-size:30px;font-weight:800;color:var(--white);letter-spacing:-1px}
+.stat-bar{height:2px;border-radius:99px;margin-top:14px;background:var(--gray-800)}
+.stat-bar-fill{height:100%;border-radius:99px;background:rgba(255,255,255,0.5);transition:width .6s ease}
+.stat-card.s-green .stat-bar-fill{background:var(--green)}
+.stat-card.s-red   .stat-bar-fill{background:var(--red)}
+.stat-card.s-blue  .stat-bar-fill{background:var(--blue)}
+
+/* Panels */
+.panel{background:var(--gray-900);border:1px solid var(--border);border-radius:var(--r);padding:26px 28px;margin-bottom:22px;position:relative;overflow:hidden}
+.panel::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)}
+.panel-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px}
+.panel-title{font-size:14px;font-weight:600;display:flex;align-items:center;gap:10px;letter-spacing:.2px}
+.panel-title svg{width:16px;height:16px;color:var(--gray-400)}
+
+/* Form row */
+.form-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:14px;align-items:end}
+.fl label{display:block;font-size:11px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--gray-500);margin-bottom:7px}
+.inp{
+  width:100%;padding:11px 14px;
+  background:var(--gray-800);
+  border:1px solid var(--border);
+  border-radius:var(--rs);
+  color:var(--white);font-size:13px;font-family:'Inter',sans-serif;
+  outline:none;transition:border-color .2s;
+}
+.inp:focus{border-color:rgba(255,255,255,0.3)}
+.inp::placeholder{color:var(--gray-600)}
+select.inp{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%23666' d='M5 7L0 2h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+
+.btn-gen{
+  padding:11px 20px;
+  background:var(--white);color:var(--black);
+  font-family:'Inter',sans-serif;font-size:13px;font-weight:700;
+  border:none;border-radius:var(--rs);cursor:pointer;
+  white-space:nowrap;display:flex;align-items:center;gap:8px;
+  transition:all .18s;letter-spacing:.3px;
+}
+.btn-gen:hover{background:var(--gray-100);transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,255,255,0.1)}
+.btn-gen:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+/* Search */
+.search-box{position:relative;max-width:260px}
+.search-box svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gray-500);width:14px;height:14px;pointer-events:none}
+.search-inp{
+  padding:9px 14px 9px 36px;width:100%;
+  background:var(--gray-800);border:1px solid var(--border);
+  border-radius:var(--rs);color:var(--white);font-size:13px;
+  font-family:'Inter',sans-serif;outline:none;transition:border-color .2s;
+}
+.search-inp:focus{border-color:rgba(255,255,255,0.25)}
+.search-inp::placeholder{color:var(--gray-600)}
+
+/* Table */
+.tbl-wrap{overflow-x:auto;margin:0 -2px}
+table{width:100%;border-collapse:collapse}
+thead th{
+  padding:10px 14px;text-align:left;
+  font-size:10px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;
+  color:var(--gray-600);border-bottom:1px solid var(--border);
+}
+tbody tr{border-bottom:1px solid rgba(255,255,255,0.03);transition:background .12s}
+tbody tr:hover{background:rgba(255,255,255,0.025)}
+tbody tr:last-child{border-bottom:none}
+tbody td{padding:13px 14px;font-size:13px;vertical-align:middle}
+
+.key-code{
+  font-family:'JetBrains Mono',monospace;font-size:12px;
+  color:var(--white);background:var(--gray-800);
+  border:1px solid var(--border);
+  padding:4px 10px;border-radius:5px;white-space:nowrap;display:inline-block;
+}
+.plan-tag{
+  display:inline-block;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:600;letter-spacing:.5px;
+}
+.plan-lifetime{background:rgba(255,255,255,0.08);color:var(--gray-200);border:1px solid rgba(255,255,255,0.12)}
+.plan-year{background:rgba(59,130,246,0.1);color:#93c5fd;border:1px solid rgba(59,130,246,0.2)}
+.plan-trial{background:rgba(245,158,11,0.1);color:#fcd34d;border:1px solid rgba(245,158,11,0.2)}
+
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:600;letter-spacing:.3px}
+.pill-active{background:rgba(34,197,94,0.1);color:#86efac;border:1px solid rgba(34,197,94,0.2)}
+.pill-revoked{background:rgba(239,68,68,0.08);color:#fca5a5;border:1px solid rgba(239,68,68,0.18)}
+.pill-dot{width:5px;height:5px;border-radius:50%}
+.pill-active .pill-dot{background:var(--green);animation:livePulse 2s infinite}
+.pill-revoked .pill-dot{background:var(--red)}
+
+/* Action btns */
+.acts{display:flex;align-items:center;gap:6px}
+.act{
+  padding:5px 11px;border-radius:5px;font-size:11px;font-weight:600;
+  font-family:'Inter',sans-serif;cursor:pointer;border:1px solid transparent;
+  transition:all .15s;letter-spacing:.3px;
+}
+.act-copy{background:var(--gray-800);color:var(--gray-300);border-color:var(--border)}
+.act-copy:hover{background:var(--gray-700);border-color:var(--border-hover);color:var(--white)}
+.act-revoke{background:rgba(239,68,68,0.07);color:#fca5a5;border-color:rgba(239,68,68,0.18)}
+.act-revoke:hover{background:rgba(239,68,68,0.15)}
+.act-activate{background:rgba(34,197,94,0.07);color:#86efac;border-color:rgba(34,197,94,0.18)}
+.act-activate:hover{background:rgba(34,197,94,0.15)}
+.act-delete{background:transparent;color:var(--gray-600);border-color:transparent}
+.act-delete:hover{color:#fca5a5;border-color:rgba(239,68,68,0.2)}
+
+/* Empty state */
+.empty{text-align:center;padding:56px 20px;color:var(--gray-600)}
+.empty-icon{margin-bottom:14px;opacity:.4}
+.empty-icon svg{width:40px;height:40px}
+.empty p{font-size:14px}
+
+/* Loading */
+.loader-row td{text-align:center;padding:40px;color:var(--gray-600)}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,0.1);border-top-color:rgba(255,255,255,0.6);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Toast */
+#toast{
+  display:none;position:fixed;bottom:28px;right:28px;z-index:9999;
+  padding:12px 20px;border-radius:8px;font-size:13px;font-weight:500;
+  backdrop-filter:blur(12px);animation:slideUp .25s ease;max-width:300px;
+}
+.toast-ok{background:rgba(16,16,16,0.95);border:1px solid rgba(34,197,94,0.35);color:#86efac}
+.toast-err{background:rgba(16,16,16,0.95);border:1px solid rgba(239,68,68,0.35);color:#fca5a5}
+.toast-info{background:rgba(16,16,16,0.95);border:1px solid rgba(255,255,255,0.15);color:var(--gray-200)}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* Divider */
+.divider{height:1px;background:var(--border);margin:0 0 22px}
+
+/* Section display */
+#sec-keys{display:block}
+#sec-verify{display:none}
+#sec-settings{display:none}
+
+/* Verify box */
+.verify-result{margin-top:20px;padding:18px 20px;border-radius:8px;font-size:13px}
+.verify-ok{background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);color:#86efac}
+.verify-fail{background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);color:#fca5a5}
+.verify-ok strong,.verify-fail strong{display:block;font-size:15px;margin-bottom:6px}
+
+/* Settings mono */
+.mono-pill{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--gray-800);border:1px solid var(--border);padding:2px 8px;border-radius:4px;color:var(--gray-300)}
+.setting-row{padding:18px 0;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:5px}
+.setting-row:last-child{border-bottom:none}
+.setting-label{font-size:13px;font-weight:600;color:var(--white)}
+.setting-desc{font-size:12px;color:var(--gray-500);line-height:1.6}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--gray-700);border-radius:99px}
+
+@media(max-width:860px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .sidebar{transform:translateX(-100%)}
+  .main{margin-left:0}
+  .form-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- Grid canvas bg -->
+<canvas id="grid-canvas"></canvas>
+<div class="glow-spot glow-spot-1"></div>
+<div class="glow-spot glow-spot-2"></div>
+
+<div class="app">
+
+<!-- ===== LOGIN ===== -->
+<div id="page-login">
+  <div class="login-card">
+    <div class="logo-mark">
+      <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="54" height="54" rx="12" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+        <circle cx="28" cy="28" r="10" stroke="rgba(255,255,255,0.9)" stroke-width="1.5"/>
+        <circle cx="28" cy="28" r="4" fill="rgba(255,255,255,0.9)"/>
+        <line x1="28" y1="8" x2="28" y2="18" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="28" y1="38" x2="28" y2="48" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="8" y1="28" x2="18" y2="28" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="38" y1="28" x2="48" y2="28" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <h1 class="login-title">Zora AI</h1>
+    <p class="login-sub">License Control Panel</p>
+    <form id="login-form">
+      <div class="field">
+        <label>Admin Password</label>
+        <div class="input-wrap">
+          <span class="input-icon">
+            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" width="14" height="14">
+              <rect x="3" y="7" width="10" height="8" rx="2" stroke="currentColor" stroke-width="1.2"/>
+              <path d="M5.5 7V5a2.5 2.5 0 015 0v2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <input type="password" id="admin-pass" class="input-ctrl" placeholder="Enter password..." autocomplete="current-password" required>
+        </div>
+      </div>
+      <button type="submit" class="btn-login" id="login-btn">Access Dashboard</button>
+    </form>
+    <p class="login-footer">Zora AI &nbsp;·&nbsp; License System v2.0</p>
+  </div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div id="page-dashboard">
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="8" cy="8" r="4" stroke="white" stroke-width="1.4"/>
+            <circle cx="8" cy="8" r="1.5" fill="white"/>
+            <line x1="8" y1="1" x2="8" y2="4" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="8" y1="12" x2="8" y2="15" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="1" y1="8" x2="4" y2="8" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="12" y1="8" x2="15" y2="8" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-name">Zora AI</div>
+          <div class="brand-ver">Control Panel</div>
+        </div>
+      </div>
+
+      <div class="nav-section">Management</div>
+      <div class="nav-item active" id="nav-keys" onclick="switchSection('keys')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+          <circle cx="6" cy="10" r="3.5"/>
+          <path d="M8.5 7.5l5-5M12 1l1.5 1.5-1 1L11 2l1-1zM10.5 4L12 5.5"/>
+        </svg>
+        License Keys
+      </div>
+      <div class="nav-item" id="nav-verify" onclick="switchSection('verify')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="7" cy="7" r="5"/>
+          <path d="M11 11l3 3"/>
+        </svg>
+        Verify Key
+      </div>
+      <div class="nav-section" style="margin-top:20px">System</div>
+      <div class="nav-item" id="nav-settings" onclick="switchSection('settings')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="8" cy="8" r="2"/>
+          <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.1 3.1l1.4 1.4M11.5 11.5l1.4 1.4M3.1 12.9l1.4-1.4M11.5 4.5l1.4-1.4"/>
+        </svg>
+        Settings
+      </div>
+
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-logout" onclick="doLogout()">
+        <svg style="width:14px;height:14px;flex-shrink:0" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 14H3a1 1 0 01-1-1V3a1 1 0 011-1h3M11 11l3-3-3-3M14 8H6"/>
+        </svg>
+        Log Out
+      </div>
+    </nav>
+
+    <!-- Main -->
+    <main class="main">
+      <div class="topbar">
+        <div>
+          <div class="topbar-title">Dashboard</div>
+          <div class="topbar-sub" id="topbar-date">Loading...</div>
+        </div>
+        <div class="status-badge"><div class="live-dot"></div>System Online</div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-top">
+            <span class="stat-card-label">Total Keys</span>
+            <div class="stat-card-icon">
+              <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="rgba(255,255,255,0.6)" stroke-width="1.2" stroke-linecap="round">
+                <circle cx="5" cy="9" r="3"/><path d="M7.5 6.5l4-4M10.5 1l1 1-.8.8L9.8 1.8 10.5 1zM9.2 3.8l1 1"/>
+              </svg>
+            </div>
+          </div>
+          <div class="stat-value" id="stat-total">—</div>
+          <div class="stat-bar"><div class="stat-bar-fill" id="bar-total" style="width:0%"></div></div>
+        </div>
+        <div class="stat-card s-green">
+          <div class="stat-card-top">
+            <span class="stat-card-label">Active</span>
+            <div class="stat-card-icon">
+              <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="rgba(34,197,94,0.8)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="7" cy="7" r="5"/><path d="M4.5 7l2 2 3-3"/>
+              </svg>
+            </div>
+          </div>
+          <div class="stat-value" id="stat-active">—</div>
+          <div class="stat-bar"><div class="stat-bar-fill" id="bar-active" style="width:0%"></div></div>
+        </div>
+        <div class="stat-card s-red">
+          <div class="stat-card-top">
+            <span class="stat-card-label">Revoked</span>
+            <div class="stat-card-icon">
+              <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="rgba(239,68,68,0.8)" stroke-width="1.2" stroke-linecap="round">
+                <circle cx="7" cy="7" r="5"/><path d="M4.5 4.5l5 5M9.5 4.5l-5 5"/>
+              </svg>
+            </div>
+          </div>
+          <div class="stat-value" id="stat-revoked">—</div>
+          <div class="stat-bar"><div class="stat-bar-fill" id="bar-revoked" style="width:0%"></div></div>
+        </div>
+        <div class="stat-card s-blue">
+          <div class="stat-card-top">
+            <span class="stat-card-label">Plan Types</span>
+            <div class="stat-card-icon">
+              <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="rgba(59,130,246,0.8)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="1" y="1" width="12" height="12" rx="2"/><path d="M1 5h12M5 5v8"/>
+              </svg>
+            </div>
+          </div>
+          <div class="stat-value" id="stat-plans">—</div>
+          <div class="stat-bar"><div class="stat-bar-fill" id="bar-plans" style="width:100%"></div></div>
+        </div>
+      </div>
+
+      <!-- SECTION: Keys -->
+      <div id="sec-keys">
+        <div class="panel">
+          <div class="panel-top">
+            <div class="panel-title">
+              <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.3" stroke-linecap="round">
+                <circle cx="6" cy="10" r="3.5"/><path d="M8.5 7.5l5-5M12 1l1.5 1.5-1 1L11 2l1-1zM10.5 4L12 5.5"/>
+              </svg>
+              Generate License Key
+            </div>
+          </div>
+          <form id="create-key-form">
+            <div class="form-grid">
+              <div class="fl">
+                <label>Client Name</label>
+                <input type="text" id="client-name" class="inp" placeholder="e.g. John Doe or Client A" required>
+              </div>
+              <div class="fl">
+                <label>Plan</label>
+                <select id="plan-type" class="inp">
+                  <option value="Lifetime Pro">Lifetime Pro</option>
+                  <option value="1 Year Access">1 Year Access</option>
+                  <option value="30 Days Trial">30 Days Trial</option>
+                </select>
+              </div>
+              <button type="submit" class="btn-gen" id="create-btn">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                  <path d="M7 1v12M1 7h12"/>
+                </svg>
+                Generate
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="panel">
+          <div class="panel-top">
+            <div class="panel-title">
+              <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h3M5 11h4"/>
+              </svg>
+              All Keys
+              <span id="key-count" style="font-size:12px;font-weight:500;color:var(--gray-500);margin-left:4px"></span>
+            </div>
+            <div class="search-box">
+              <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+                <circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/>
+              </svg>
+              <input type="text" class="search-inp" placeholder="Search key or client..." id="search-input" oninput="filterTable()">
+            </div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>License Key</th><th>Client</th><th>Plan</th><th>Status</th><th>Created</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="keys-tbody">
+                <tr class="loader-row"><td colspan="6"><span class="spinner"></span>Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION: Verify -->
+      <div id="sec-verify">
+        <div class="panel">
+          <div class="panel-title" style="margin-bottom:22px">
+            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.3" stroke-linecap="round">
+              <circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/>
+            </svg>
+            Verify a License Key
+          </div>
+          <div style="max-width:480px">
+            <div class="fl" style="margin-bottom:14px">
+              <label>License Key</label>
+              <input type="text" id="verify-input" class="inp" placeholder="ZORA-XXXX-XXXX-XXXX" style="font-family:'JetBrains Mono',monospace;letter-spacing:1px">
+            </div>
+            <button class="btn-gen" onclick="verifyKey()">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                <circle cx="6" cy="6" r="5"/><path d="M10 10l3 3"/>
+              </svg>
+              Run Verification
+            </button>
+          </div>
+          <div id="verify-result"></div>
+        </div>
+      </div>
+
+      <!-- SECTION: Settings -->
+      <div id="sec-settings">
+        <div class="panel">
+          <div class="panel-title" style="margin-bottom:22px">
+            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="8" cy="8" r="2"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.1 3.1l1.4 1.4M11.5 11.5l1.4 1.4M3.1 12.9l1.4-1.4M11.5 4.5l1.4-1.4"/>
+            </svg>
+            Configuration
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">Admin Password</div>
+            <div class="setting-desc">Set via Cloudflare Pages &rarr; Settings &rarr; Environment Variables. Variable name: <span class="mono-pill">ADMIN_PASSWORD</span></div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">KV Namespace</div>
+            <div class="setting-desc">Bind your KV store as <span class="mono-pill">ZORA_KEYS</span> in Cloudflare Pages bindings. All keys are stored there.</div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">Client Verify Endpoint</div>
+            <div class="setting-desc">The Zora AI app calls <span class="mono-pill">GET /api/verify?key=ZORA-XXXX</span> on startup to validate the license.</div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">Default Demo Key</div>
+            <div class="setting-desc">For testing before KV is set up, use: <span class="mono-pill">ZORA-TEST-PRO-2026</span></div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">Version</div>
+            <div class="setting-desc">Zora AI License Panel v2.0 &nbsp;&middot;&nbsp; Powered by Cloudflare Pages + KV</div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── Animated Grid ──────────────────────────────────────────
+(function(){
+  const c=document.getElementById('grid-canvas'),ctx=c.getContext('2d');
+  let W,H;
+  function resize(){W=c.width=innerWidth;H=c.height=innerHeight}
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    const sz=60,lc='rgba(255,255,255,0.04)';
+    ctx.strokeStyle=lc;ctx.lineWidth=1;
+    for(let x=0;x<W;x+=sz){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+    for(let y=0;y<H;y+=sz){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+  }
+  window.addEventListener('resize',()=>{resize();draw()});
+  resize();draw();
+})();
+
+// ── State & Elements ───────────────────────────────────────
+let TOKEN=localStorage.getItem('zora_token')||'';
+let allKeys={};
+
+if(TOKEN) showDash();
+
+document.getElementById('login-form').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const p=document.getElementById('admin-pass').value.trim();
+  if(!p)return;
+  const btn=document.getElementById('login-btn');
+  btn.textContent='Verifying...';btn.disabled=true;
+  TOKEN=p;localStorage.setItem('zora_token',p);
+  await showDash();
+  btn.textContent='Access Dashboard';btn.disabled=false;
+});
+
+function doLogout(){
+  localStorage.removeItem('zora_token');TOKEN='';
+  document.getElementById('page-dashboard').style.display='none';
+  document.getElementById('page-login').style.display='flex';
+}
+
+async function showDash(){
+  document.getElementById('page-login').style.display='none';
+  document.getElementById('page-dashboard').style.display='block';
+  const n=new Date();
+  document.getElementById('topbar-date').textContent=n.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  await loadKeys();
+}
+
+// ── Section Nav ────────────────────────────────────────────
+function switchSection(name){
+  ['keys','verify','settings'].forEach(s=>{
+    document.getElementById('sec-'+s).style.display=s===name?'block':'none';
+    const n=document.getElementById('nav-'+s);
+    if(n)n.classList.toggle('active',s===name);
+  });
+}
+
+// ── Toast ──────────────────────────────────────────────────
+let toastT;
+function toast(msg,type='info'){
+  clearTimeout(toastT);
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast-'+type;
+  t.style.display='block';
+  toastT=setTimeout(()=>t.style.display='none',3500);
+}
+
+// ── Load & Render Keys ─────────────────────────────────────
+async function loadKeys(){
+  const tb=document.getElementById('keys-tbody');
+  tb.innerHTML='<tr class="loader-row"><td colspan="6"><span class="spinner"></span>Loading...</td></tr>';
+  try{
+    const r=await fetch('/api/keys',{headers:{Authorization:`Bearer ${TOKEN}`}});
+    if(r.status===401){toast('Incorrect password. Please log in again.','err');setTimeout(doLogout,1800);return;}
+    allKeys=await r.json();renderKeys(allKeys);
+  }catch(e){
+    tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--gray-600)">Could not reach API. Make sure the Cloudflare worker is deployed.</td></tr>';
+  }
+}
+
+function renderKeys(keys){
+  const entries=Object.entries(keys);
+  const total=entries.length,active=entries.filter(([,v])=>v.active).length,revoked=total-active;
+  const plans=new Set(entries.map(([,v])=>v.plan)).size;
+
+  document.getElementById('stat-total').textContent=total;
+  document.getElementById('stat-active').textContent=active;
+  document.getElementById('stat-revoked').textContent=revoked;
+  document.getElementById('stat-plans').textContent=plans;
+  document.getElementById('key-count').textContent='('+total+')';
+
+  // progress bars
+  const pct=(n,d)=>d?Math.round(n/d*100):0;
+  document.getElementById('bar-total').style.width='100%';
+  document.getElementById('bar-active').style.width=pct(active,total)+'%';
+  document.getElementById('bar-revoked').style.width=pct(revoked,total)+'%';
+
+  const tb=document.getElementById('keys-tbody');
+  if(total===0){
+    tb.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-icon"><svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><circle cx="15" cy="25" r="8"/><path d="M21 17l12-12M30 3l3 3-2 2-3-3 2-2zM27 9l3 3"/></svg></div><p>No license keys found. Generate your first key above.</p></div></td></tr>';
+    return;
+  }
+  tb.innerHTML='';
+  for(const[key,data]of entries){
+    const a=data.active;
+    let pc='plan-lifetime';
+    if((data.plan||'').includes('Year'))pc='plan-year';
+    if((data.plan||'').includes('Trial')||(data.plan||'').includes('30'))pc='plan-trial';
+    const tr=document.createElement('tr');
+    tr.dataset.key=key;tr.dataset.client=(data.client||'').toLowerCase();
+    tr.innerHTML=`
+      <td><span class="key-code">${x(key)}</span></td>
+      <td style="font-weight:500">${x(data.client||'Unknown')}</td>
+      <td><span class="plan-tag ${pc}">${x(data.plan||'Pro')}</span></td>
+      <td><span class="pill ${a?'pill-active':'pill-revoked'}"><span class="pill-dot"></span>${a?'Active':'Revoked'}</span></td>
+      <td style="color:var(--gray-500);font-size:12px;font-family:'JetBrains Mono',monospace">${x(data.created_at||'—')}</td>
+      <td><div class="acts">
+        <button class="act act-copy" onclick="copyKey('${x(key)}')">Copy</button>
+        ${a?`<button class="act act-revoke" onclick="toggleStatus('${x(key)}',false)">Revoke</button>`
+           :`<button class="act act-activate" onclick="toggleStatus('${x(key)}',true)">Activate</button>`}
+        <button class="act act-delete" onclick="deleteKey('${x(key)}')">Delete</button>
+      </div></td>`;
+    tb.appendChild(tr);
+  }
+}
+
+function filterTable(){
+  const q=document.getElementById('search-input').value.toLowerCase();
+  document.querySelectorAll('#keys-tbody tr[data-key]').forEach(tr=>{
+    tr.style.display=(tr.dataset.key.toLowerCase().includes(q)||tr.dataset.client.includes(q))?'':'none';
+  });
+}
+
+// ── Create Key ─────────────────────────────────────────────
+document.getElementById('create-key-form').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const client=document.getElementById('client-name').value.trim();
+  const plan=document.getElementById('plan-type').value;
+  const btn=document.getElementById('create-btn');
+  btn.disabled=true;btn.innerHTML='<span class="spinner" style="width:14px;height:14px;border-width:1.5px"></span> Generating...';
+  try{
+    const r=await fetch('/api/keys',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${TOKEN}`},body:JSON.stringify({action:'create',client,plan})});
+    const d=await r.json();
+    if(d.success){toast('Key created: '+d.key,'ok');document.getElementById('client-name').value='';await loadKeys();}
+    else toast('Error: '+(d.error||'Failed'),'err');
+  }catch(e){toast('Network error','err');}
+  btn.disabled=false;btn.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 1v12M1 7h12"/></svg> Generate';
+});
+
+// ── Actions ────────────────────────────────────────────────
+window.copyKey=k=>{navigator.clipboard.writeText(k).then(()=>toast('Copied to clipboard','ok'))};
+
+window.toggleStatus=async(key,s)=>{
+  try{
+    await fetch('/api/keys',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${TOKEN}`},body:JSON.stringify({action:'toggle',key,active:s})});
+    await loadKeys();toast(s?'Key activated':'Key revoked','ok');
+  }catch(e){toast('Failed to update','err');}
+};
+
+window.deleteKey=async key=>{
+  if(!confirm('Delete key: '+key+'\n\nThis is permanent.'))return;
+  try{
+    await fetch('/api/keys',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${TOKEN}`},body:JSON.stringify({action:'delete',key})});
+    await loadKeys();toast('Key deleted','info');
+  }catch(e){toast('Failed to delete','err');}
+};
+
+// ── Verify ─────────────────────────────────────────────────
+window.verifyKey=async()=>{
+  const key=document.getElementById('verify-input').value.trim();
+  const box=document.getElementById('verify-result');
+  if(!key){toast('Enter a key first','err');return;}
+  box.innerHTML='';
+  try{
+    const r=await fetch('/api/verify?key='+encodeURIComponent(key));
+    const d=await r.json();
+    if(d.valid){
+      box.innerHTML=`<div class="verify-result verify-ok"><strong>License Valid</strong>Client: ${x(d.client)} &nbsp;&middot;&nbsp; Plan: ${x(d.plan)}</div>`;
+    }else{
+      box.innerHTML=`<div class="verify-result verify-fail"><strong>Invalid License</strong>${x(d.error||'Key not found or revoked')}</div>`;
+    }
+  }catch(e){toast('Verification failed. Is the worker deployed?','err');}
+};
+
+// ── XSS escape ─────────────────────────────────────────────
+function x(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "ZORA-VSEB-S43S-C6SS": {
+    "client": "nion",
+    "plan": "Lifetime Pro",
+    "active": true,
+    "created_at": "06/09/2026"
+  },
+  "ZORA-HKDU-NDOF-HY33": {
+    "client": "shijan",
+    "plan": "Lifetime Pro",
+    "active": true,
+    "created_at": "06/09/2026"
+  }
+}
