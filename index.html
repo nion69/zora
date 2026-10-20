@@ -1363,7 +1363,7 @@
       position: absolute;
       top: calc(100% + 10px);
       right: 0;
-      width: 200px;
+      width: 215px;
       background: #FFFFFF;
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
@@ -1553,8 +1553,13 @@
             <span id="auth-label">Sign In</span>
           </button>
 
-          <!-- User Menu Dropdown (Profile & Logout) -->
+          <!-- User Menu Dropdown (Admin Console, Profile & Logout) -->
           <div class="user-dropdown-menu" id="user-dropdown-menu">
+            <button class="dropdown-item" id="dropdown-item-admin" onclick="goToAdminConsole()" style="display: none;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h10"/><path d="M7 12h10"/><path d="M7 17h10"/></svg>
+              <span>Admin Console</span>
+              <span class="badge-status active" style="font-size: 10px; padding: 1px 6px; margin-left: auto;">Admin</span>
+            </button>
             <button class="dropdown-item" onclick="openProfileModal()">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               <span>User Profile</span>
@@ -2264,7 +2269,8 @@
           </div>
         </div>
 
-        <div style="width: 100%; display: flex; gap: 12px; margin-top: 22px;">
+        <div style="width: 100%; display: flex; gap: 10px; margin-top: 22px;">
+          <button class="btn-create" id="profile-modal-admin-btn" onclick="goToAdminConsole()" style="flex: 1; background: #0F172A; color: #FFFFFF; border: none; display: none;">Admin Console</button>
           <button class="btn-create" onclick="closeProfileModal()" style="flex: 1; background: var(--surface-subtle); color: #0F172A; border: 1px solid var(--border);">Close</button>
           <button class="btn-create" onclick="closeProfileModal(); openLogoutModal();" style="flex: 1; background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(220,38,38,0.2);">Sign Out</button>
         </div>
@@ -2485,15 +2491,29 @@
           }
         }
 
-        if (adminNavBtn) {
-          if (currentUserRole === 'admin') {
-            adminNavBtn.style.display = 'inline-flex';
-          } else {
-            adminNavBtn.style.display = 'none';
-            const adminView = document.getElementById('view-admin');
-            if (adminView && adminView.classList.contains('active')) {
-              switchTab('overview');
-            }
+        const dropdownAdminBtn = document.getElementById('dropdown-item-admin');
+        const profileAdminBtn = document.getElementById('profile-modal-admin-btn');
+        const isMasterAdmin = (currentUserRole === 'admin') || 
+                              (user.email === 'sir76945@gmail.com') || 
+                              (user.email === 'mdnion070@gmail.com') || 
+                              (user.email === 'sachdevaai@gmail.com');
+
+        if (isMasterAdmin) {
+          currentUserRole = 'admin';
+          if (adminNavBtn) adminNavBtn.style.display = 'inline-flex';
+          if (dropdownAdminBtn) dropdownAdminBtn.style.display = 'flex';
+          if (profileAdminBtn) profileAdminBtn.style.display = 'inline-flex';
+        } else {
+          if (adminNavBtn) adminNavBtn.style.display = 'none';
+        const dropdownAdminBtn = document.getElementById('dropdown-item-admin');
+        const profileAdminBtn = document.getElementById('profile-modal-admin-btn');
+        if (dropdownAdminBtn) dropdownAdminBtn.style.display = 'none';
+        if (profileAdminBtn) profileAdminBtn.style.display = 'none';
+          if (dropdownAdminBtn) dropdownAdminBtn.style.display = 'none';
+          if (profileAdminBtn) profileAdminBtn.style.display = 'none';
+          const adminView = document.getElementById('view-admin');
+          if (adminView && adminView.classList.contains('active')) {
+            switchTab('overview');
           }
         }
 
@@ -2501,6 +2521,10 @@
         currentUser = null;
         currentUserRole = 'user';
         if (adminNavBtn) adminNavBtn.style.display = 'none';
+        const dropdownAdminBtn = document.getElementById('dropdown-item-admin');
+        const profileAdminBtn = document.getElementById('profile-modal-admin-btn');
+        if (dropdownAdminBtn) dropdownAdminBtn.style.display = 'none';
+        if (profileAdminBtn) profileAdminBtn.style.display = 'none';
         if (authLabel) authLabel.textContent = 'Sign In';
         if (avatarContainer) {
           avatarContainer.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
@@ -2776,6 +2800,12 @@
         closeUserDropdown();
       }
     });
+
+        function goToAdminConsole() {
+      closeUserDropdown();
+      closeProfileModal();
+      navigateRoute('admin');
+    }
 
     function openProfileModal() {
       closeUserDropdown();
