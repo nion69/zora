@@ -1421,6 +1421,26 @@
       margin: 4px 0;
     }
 
+        .role-select-dropdown {
+      height: 34px;
+      padding: 0 12px;
+      background: #FFFFFF;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 600;
+      color: #0F172A;
+      cursor: pointer;
+      outline: none;
+      transition: all 0.15s ease;
+    }
+
+    .role-select-dropdown:focus {
+      border-color: #2563EB;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+    }
+
     /* ── Toast Notifications ── */
     #toast-container {
       position: fixed;
@@ -2459,9 +2479,11 @@
           currentUserRole = 'user';
         }
 
-        // Automatic master admin recognition if applicable
-        if (user.email === 'sachdevaai@gmail.com' || user.email === 'mdnion070@gmail.com' || user.email === 'sir76945@gmail.com') {
-          currentUserRole = 'admin';
+        // Role is strictly read from Firestore database (no artificial override)
+        if (snap.exists) {
+          currentUserRole = (snap.data().role || 'user').toLowerCase();
+        } else {
+          currentUserRole = 'user';
         }
 
         const name = user.displayName || user.email.split('@')[0];
@@ -2860,15 +2882,10 @@
                 <span class="role-badge ${role}">${role.toUpperCase()}</span>
               </td>
               <td style="text-align: right;">
-                ${isAdmin ? `
-                  <button class="btn-action-sm" onclick="setUserRole('${uid}', 'user', '${name.replace(/'/g, "\\'")}')" style="color: var(--text-secondary);">
-                    Demote to User
-                  </button>
-                ` : `
-                  <button class="btn-action-sm" onclick="setUserRole('${uid}', 'admin', '${name.replace(/'/g, "\\'")}')" style="color: var(--accent-blue); font-weight: 700; border-color: rgba(37,99,235,0.3);">
-                    Promote to Admin
-                  </button>
-                `}
+                <select class="role-select-dropdown" onchange="setUserRole('${uid}', this.value, '${name.replace(/'/g, "\\'")}')">
+                  <option value="user" ${role === 'user' ? 'selected' : ''}>USER</option>
+                  <option value="admin" ${role === 'admin' ? 'selected' : ''}>ADMIN</option>
+                </select>
               </td>
             </tr>
           `);
@@ -2886,7 +2903,8 @@
         showToast(`Role updated to ${newRole.toUpperCase()} for ${userName}`);
         loadFirestoreUsers();
       } catch (err) {
-        showToast(`Error updating role: ${err.message}`);
+        showToast(`Permission denied: Your current account must be an Admin in Firestore rules or database.`);
+        loadFirestoreUsers(); // reset dropdown
       }
     }
 
