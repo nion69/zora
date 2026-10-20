@@ -2454,25 +2454,22 @@
     const db = firebase.firestore();
 
     // ── Monitor Auth State & RBAC ──
-    auth.onAuthStateChanged(async (user) => {
+    let userDocUnsubscribe = null;
+
+    auth.onAuthStateChanged((user) => {
       currentUser = user;
       const adminNavBtn = document.getElementById('tab-btn-admin');
       const authLabel = document.getElementById('auth-label');
       const avatarContainer = document.getElementById('auth-avatar-container');
+      const dropdownAdminBtn = document.getElementById('dropdown-item-admin');
+      const profileAdminBtn = document.getElementById('profile-modal-admin-btn');
+
+      if (userDocUnsubscribe) {
+        userDocUnsubscribe();
+        userDocUnsubscribe = null;
+      }
 
       if (user) {
-        let dbRole = 'user';
-        try {
-          const userDocRef = db.collection('users').doc(user.uid);
-          const snap = await userDocRef.get();
-          if (snap.exists) {
-            dbRole = (snap.data().role || 'user').toLowerCase();
-          }
-        } catch (err) {
-          console.warn('User doc query warning:', err);
-        }
-
-        currentUserRole = dbRole;
         const name = user.displayName || user.email.split('@')[0] || 'User';
         if (authLabel) authLabel.textContent = name;
 
@@ -2484,38 +2481,49 @@
           }
         }
 
-        const dropdownAdminBtn = document.getElementById('dropdown-item-admin');
-        const profileAdminBtn = document.getElementById('profile-modal-admin-btn');
-        const isMasterAdmin = (currentUserRole === 'admin') || 
-                              (user.email === 'sir76945@gmail.com') || 
-                              (user.email === 'mdnion070@gmail.com') || 
-                              (user.email === 'sachdevaai@gmail.com');
+        // Real-time listener: strictly from Firestore database (no hardcoded emails)
+        const userDocRef = db.collection('users').doc(user.uid);
+        userDocUnsubscribe = userDocRef.onSnapshot((snap) => {
+          let dbRole = 'user';
+          if (snap && snap.exists) {
+            const data = snap.data();
+            dbRole = (data && data.role ? data.role : 'user').toLowerCase();
+          }
+          currentUserRole = dbRole;
 
-        if (isMasterAdmin) {
-          currentUserRole = 'admin';
-          if (adminNavBtn) adminNavBtn.style.display = 'inline-flex';
-          if (dropdownAdminBtn) dropdownAdminBtn.style.display = 'flex';
-          if (profileAdminBtn) profileAdminBtn.style.display = 'inline-flex';
-        } else {
-          if (adminNavBtn) adminNavBtn.style.display = 'none';
-        const dropdownAdminBtn = document.getElementById('dropdown-item-admin');
-        const profileAdminBtn = document.getElementById('profile-modal-admin-btn');
-        if (dropdownAdminBtn) dropdownAdminBtn.style.display = 'none';
-        if (profileAdminBtn) profileAdminBtn.style.display = 'none';
+          if (currentUserRole === 'admin') {
+            if (dropdownAdminBtn) dropdownAdminBtn.style.display = 'flex';
+            if (profileAdminBtn) profileAdminBtn.style.display = 'inline-flex';
+          } else {
+            if (dropdownAdminBtn) dropdownAdminBtn.style.display = 'none';
+            if (profileAdminBtn) profileAdminBtn.style.display = 'none';
+            const adminView = document.getElementById('view-admin');
+            if (adminView && adminView.classList.contains('active')) {
+              switchTab('overview');
+            }
+          }
+
+          // Update profile modal if currently open
+          const roleBadge = document.getElementById('profile-modal-role');
+          const roleLabel = document.getElementById('profile-modal-role-label');
+          if (roleBadge) {
+            roleBadge.className = `role-badge ${currentUserRole}`;
+            roleBadge.textContent = currentUserRole.toUpperCase();
+          }
+          if (roleLabel) {
+            roleLabel.textContent = currentUserRole === 'admin' ? 'Administrator' : 'Standard User';
+          }
+        }, (err) => {
+          console.warn('Real-time user snapshot error:', err);
+          currentUserRole = 'user';
           if (dropdownAdminBtn) dropdownAdminBtn.style.display = 'none';
           if (profileAdminBtn) profileAdminBtn.style.display = 'none';
-          const adminView = document.getElementById('view-admin');
-          if (adminView && adminView.classList.contains('active')) {
-            switchTab('overview');
-          }
-        }
+        });
 
       } else {
         currentUser = null;
         currentUserRole = 'user';
         if (adminNavBtn) adminNavBtn.style.display = 'none';
-        const dropdownAdminBtn = document.getElementById('dropdown-item-admin');
-        const profileAdminBtn = document.getElementById('profile-modal-admin-btn');
         if (dropdownAdminBtn) dropdownAdminBtn.style.display = 'none';
         if (profileAdminBtn) profileAdminBtn.style.display = 'none';
         if (authLabel) authLabel.textContent = 'Sign In';

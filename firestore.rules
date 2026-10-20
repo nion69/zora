@@ -3,38 +3,35 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ── Helper: Check if request is authenticated ──
+    // Helper: Check if request is authenticated
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    // ── Helper: Check if user has 'admin' role or is master owner ──
+    // Helper: Check if user has 'admin' role in Firestore database document (NO hardcoded emails)
     function isAdmin() {
-      return isAuthenticated() && (
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
-        request.auth.token.email in ['sir76945@gmail.com', 'mdnion070@gmail.com', 'sachdevaai@gmail.com']
-      );
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    // ── Users Collection (User Profiles & Roles) ──
+    // Users Collection (User Profiles & Roles)
     match /users/{userId} {
       allow read: if isAuthenticated();
+      // Allow user to create their initial profile document during signup
       allow create: if isAuthenticated() && request.auth.uid == userId;
-      allow update: if isAdmin() || (
-        isAuthenticated() && 
-        request.auth.uid == userId && 
-        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']))
-      );
+      // Only users who are already admin can change roles or modify user profiles
+      allow update: if isAdmin();
       allow delete: if isAdmin();
     }
 
-    // ── Licenses Collection (Hardware / Client Keys) ──
+    // Licenses Collection (Hardware / Client Keys)
     match /licenses/{licenseKey} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // ── Telemetry & Metrics Collection ──
+    // Telemetry & Metrics Collection
     match /stats/{statDoc} {
       allow read: if true;
       allow write: if isAdmin();

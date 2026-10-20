@@ -1,62 +1,55 @@
-# 🔐 How to Update Firebase Firestore Rules for Zora AI
+# 🔐 Firebase Firestore Security Rules (Strict Database-Driven Roles)
 
-To enable authentication, license creation, and role-based admin access, follow these quick steps:
-
----
-
-### Step 1: Open Firebase Console
-1. Go to **[https://console.firebase.google.com/](https://console.firebase.google.com/)**
-2. Select your project: **`zora-4b5eb`**
+Use these rules in the Firebase Console. There are **NO hardcoded admin emails**; permissions are driven strictly by the `role` field in the user's document in the `users` collection in Firestore.
 
 ---
 
-### Step 2: Open Firestore Database Rules
-1. In the left navigation menu, click on **Build** &rarr; **Firestore Database**
-2. Click on the **Rules** tab at the top (next to *Data* and *Indexes*)
+### Step 1: Open Firebase Console Rules
+1. Open [Firebase Console](https://console.firebase.google.com/) & select **`zora-4b5eb`**.
+2. Go to **Firestore Database** &rarr; **Rules** tab.
 
 ---
 
-### Step 3: Paste the Updated Rules
-Delete whatever is in the editor and paste the following:
+### Step 2: Copy & Paste These Rules
 
 ```javascript
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper functions
+    // Helper: Check if request is authenticated
     function isAuthenticated() {
       return request.auth != null;
     }
 
+    // Helper: Check if user has 'admin' role in their Firestore user document
     function isAdmin() {
-      return isAuthenticated() && (
-        request.auth.token.email == "neon@zora.ai" ||
-        request.auth.token.email == "sir76@gmail.com" ||
-        request.auth.token.email.matches(".*neon.*") ||
-        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin")
-      );
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    // 1. Licenses collection (Public read for terminal verification + stats, Write for authenticated users/admins)
-    match /licenses/{keyId} {
-      allow read: if true;
-      allow write: if isAuthenticated();
-    }
-
-    // 2. Users collection (Auth & Role-Based Access Control)
+    // Users Collection (User Profiles & Roles)
     match /users/{userId} {
-      allow read: if true;
-      allow create: if isAuthenticated();
-      allow update: if isAuthenticated();
+      allow read: if isAuthenticated();
+      // Allow user to create their initial profile document during signup
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      // Only users who are already admin can change roles or modify user profiles
+      allow update: if isAdmin();
       allow delete: if isAdmin();
     }
 
-    // 3. Fallback for any other collections
-    match /{document=**} {
+    // Licenses Collection (Hardware / Client Keys)
+    match /licenses/{licenseKey} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Telemetry & Metrics Collection
+    match /stats/{statDoc} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
   }
 }
@@ -64,21 +57,8 @@ service cloud.firestore {
 
 ---
 
-### Step 4: Click Publish
-Click the blue **Publish** button at the top right of the Rules editor.
-Your new security rules take effect immediately across all web dashboards and terminals!
-
----
-
-### Optional: 100% Open Development Mode
-If you prefer zero restrictions during local testing:
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if true;
-    }
-  }
-}
-```
+### Step 3: How to make an account Admin manually
+1. In Firebase Console &rarr; **Firestore Database** &rarr; **`users`** collection.
+2. Click the document corresponding to the user's UID.
+3. Edit the `role` field value from `user` to `admin` (or vice-versa).
+4. As soon as you save, the live website automatically updates in real-time via the real-time snapshot listener!
