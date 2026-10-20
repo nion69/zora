@@ -1531,7 +1531,6 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </span>
             <span id="auth-label">Sign In</span>
-            <span id="auth-role-badge"></span>
           </button>
 
           <!-- User Menu Dropdown (Profile & Logout) -->
@@ -1541,7 +1540,7 @@
               <span>User Profile</span>
             </button>
             <div class="dropdown-divider"></div>
-            <button class="dropdown-item danger" onclick="handleSignOut()">
+            <button class="dropdown-item danger" onclick="openLogoutModal()">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
               <span>Sign Out</span>
             </button>
@@ -2049,6 +2048,44 @@
           </div>
         </div>
 
+        <!-- ── USER MANAGEMENT & ROLE CONTROL CARD ── -->
+        <div class="admin-card">
+          <div class="admin-header-row">
+            <div>
+              <h3 class="admin-title" style="font-size: 20px;">User Directory & Role Control</h3>
+              <p class="admin-desc">Live Firestore user registry. Promote or demote user permissions in real-time.</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <span class="badge-status active" id="badge-total-users-count" style="font-family: var(--font-mono); font-size: 11px;">Loading users...</span>
+              <button class="btn-action-sm" onclick="loadFirestoreUsers()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                Refresh Users
+              </button>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="license-table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Email</th>
+                  <th>Joined</th>
+                  <th>Current Role</th>
+                  <th style="text-align: right;">Role Management</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body">
+                <tr>
+                  <td colspan="5" style="text-align: center; padding: 28px; color: var(--text-tertiary);">
+                    Loading registered users from Firestore...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
     </section>
   </main>
@@ -2212,8 +2249,33 @@
 
         <div style="width: 100%; display: flex; gap: 12px; margin-top: 22px;">
           <button class="btn-create" onclick="closeProfileModal()" style="flex: 1; background: var(--surface-subtle); color: #0F172A; border: 1px solid var(--border);">Close</button>
-          <button class="btn-create" onclick="closeProfileModal(); handleSignOut();" style="flex: 1; background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(220,38,38,0.2);">Sign Out</button>
+          <button class="btn-create" onclick="closeProfileModal(); openLogoutModal();" style="flex: 1; background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(220,38,38,0.2);">Sign Out</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- ═════════════════════════════════════════════════════════ -->
+  <!-- CUSTOM LOGOUT CONFIRMATION MODAL                          -->
+  <!-- ═════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="logout-confirm-modal">
+    <div class="modal-card" style="max-width: 390px; text-align: center; padding: 28px 24px;">
+      <div style="width: 54px; height: 54px; border-radius: 50%; background: var(--danger-bg); border: 1px solid rgba(220, 38, 38, 0.2); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; color: var(--danger);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+      </div>
+
+      <h3 style="font-size: 19px; font-weight: 800; color: #0F172A; margin-bottom: 8px;">Confirm Sign Out</h3>
+      <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 24px;">
+        Are you sure you want to sign out of Zora AI? You can sign back in at any time.
+      </p>
+
+      <div style="display: flex; gap: 10px;">
+        <button class="btn-create" onclick="closeLogoutModal()" style="flex: 1; background: var(--surface-subtle); color: #0F172A; border: 1px solid var(--border);">
+          Cancel
+        </button>
+        <button class="btn-create" onclick="confirmSignOut()" style="flex: 1; background: var(--danger); color: #FFFFFF; border: none;">
+          Sign Out
+        </button>
       </div>
     </div>
   </div>
@@ -2398,14 +2460,14 @@
         }
 
         // Automatic master admin recognition if applicable
-        if (user.email === 'sachdevaai@gmail.com') {
+        if (user.email === 'sachdevaai@gmail.com' || user.email === 'mdnion070@gmail.com' || user.email === 'sir76945@gmail.com') {
           currentUserRole = 'admin';
         }
 
         const name = user.displayName || user.email.split('@')[0];
         authLabel.textContent = name;
-        roleBadge.className = `role-badge ${currentUserRole}`;
-        roleBadge.textContent = currentUserRole;
+        // role badge removed from nav button
+        // role badge text removed from nav button
 
         if (user.photoURL) {
           avatarContainer.innerHTML = `<img src="${user.photoURL}" class="user-avatar" alt="Avatar">`;
@@ -2606,6 +2668,7 @@
 
       if (tabId === 'admin') {
         loadKeys();
+        loadFirestoreUsers();
       }
     }
 
@@ -2728,6 +2791,103 @@
 
     function closeProfileModal() {
       document.getElementById('profile-modal').style.display = 'none';
+    }
+
+        // ── Custom Logout Confirmation Modal Handlers ──
+    function openLogoutModal() {
+      closeUserDropdown();
+      closeProfileModal();
+      document.getElementById('logout-confirm-modal').style.display = 'flex';
+    }
+
+    function closeLogoutModal() {
+      document.getElementById('logout-confirm-modal').style.display = 'none';
+    }
+
+    async function confirmSignOut() {
+      closeLogoutModal();
+      try {
+        await auth.signOut();
+        showToast('Signed out successfully.');
+      } catch (err) {
+        showToast('Error signing out.');
+      }
+    }
+
+    // ── Admin User Management (Firestore RBAC) ──
+    async function loadFirestoreUsers() {
+      const tbody = document.getElementById('users-table-body');
+      const countBadge = document.getElementById('badge-total-users-count');
+      if (!tbody) return;
+
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 24px; color: var(--text-tertiary);">Loading user directory...</td></tr>`;
+
+      try {
+        const snap = await db.collection('users').get();
+        if (snap.empty) {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 24px; color: var(--text-tertiary);">No users registered yet.</td></tr>`;
+          if (countBadge) countBadge.textContent = '0 Users';
+          return;
+        }
+
+        if (countBadge) countBadge.textContent = `${snap.size} Registered Users`;
+
+        const rows = [];
+        snap.forEach(doc => {
+          const u = doc.data();
+          const uid = doc.id;
+          const role = (u.role || 'user').toLowerCase();
+          const isAdmin = role === 'admin';
+          const avatarUrl = u.photoURL || '';
+          const name = u.displayName || u.email?.split('@')[0] || 'User';
+          const email = u.email || 'N/A';
+          let joined = 'Recently';
+          if (u.createdAt && u.createdAt.toDate) {
+            joined = u.createdAt.toDate().toLocaleDateString('en-GB');
+          }
+
+          rows.push(`
+            <tr>
+              <td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  ${avatarUrl ? `<img src="${avatarUrl}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border);">` : `<div style="width: 28px; height: 28px; border-radius: 50%; background: var(--surface-subtle); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11px; color: #0F172A;">${name.charAt(0).toUpperCase()}</div>`}
+                  <span style="font-weight: 600; color: #0F172A;">${name}</span>
+                </div>
+              </td>
+              <td>${email}</td>
+              <td style="font-family: var(--font-mono); font-size: 12px;">${joined}</td>
+              <td>
+                <span class="role-badge ${role}">${role.toUpperCase()}</span>
+              </td>
+              <td style="text-align: right;">
+                ${isAdmin ? `
+                  <button class="btn-action-sm" onclick="setUserRole('${uid}', 'user', '${name.replace(/'/g, "\\'")}')" style="color: var(--text-secondary);">
+                    Demote to User
+                  </button>
+                ` : `
+                  <button class="btn-action-sm" onclick="setUserRole('${uid}', 'admin', '${name.replace(/'/g, "\\'")}')" style="color: var(--accent-blue); font-weight: 700; border-color: rgba(37,99,235,0.3);">
+                    Promote to Admin
+                  </button>
+                `}
+              </td>
+            </tr>
+          `);
+        });
+
+        tbody.innerHTML = rows.join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 24px; color: var(--danger);">Failed to load users: ${err.message}</td></tr>`;
+      }
+    }
+
+    async function setUserRole(uid, newRole, userName) {
+      try {
+        await db.collection('users').doc(uid).update({ role: newRole });
+        showToast(`Role updated to ${newRole.toUpperCase()} for ${userName}`);
+        loadFirestoreUsers();
+      } catch (err) {
+        showToast(`Error updating role: ${err.message}`);
+      }
     }
 
     async function handleSignOut() {
