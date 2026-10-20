@@ -1,0 +1,54 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper: Check if request is authenticated ──
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // ── Helper: Check if authenticated user has 'admin' role in Firestore ──
+    function isAdmin() {
+      return isAuthenticated() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+        request.auth.token.email == 'sachdevaai@gmail.com'
+      );
+    }
+
+    // ── Users Collection (User Profiles & Roles) ──
+    match /users/{userId} {
+      // Authenticated users can read their own profile (or other user profiles)
+      allow read: if isAuthenticated();
+
+      // On first sign up / sign in, user can create their own doc with role: 'user'
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+
+      // Only admins can change the 'role' field.
+      // Normal users can update their profile (displayName, photoURL) but CANNOT change their role.
+      allow update: if isAdmin() || (
+        isAuthenticated() && 
+        request.auth.uid == userId && 
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']))
+      );
+
+      // Only admins can delete user records
+      allow delete: if isAdmin();
+    }
+
+    // ── Licenses Collection (Hardware / Client Keys) ──
+    match /licenses/{licenseKey} {
+      // Assistants and client machines can verify/read license keys
+      allow read: if true;
+
+      // ONLY authenticated users with role == 'admin' can create, update, or revoke licenses!
+      allow write: if isAdmin();
+    }
+
+    // ── Telemetry & Metrics Collection ──
+    match /stats/{statDoc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}
