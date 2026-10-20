@@ -1353,6 +1353,74 @@
       color: var(--text-tertiary);
     }
 
+        /* ── User Profile Dropdown Menu ── */
+    .user-menu-container {
+      position: relative;
+    }
+
+    .user-dropdown-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      width: 200px;
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      padding: 6px;
+      z-index: 300;
+      animation: dropdownSlideIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .user-dropdown-menu.show {
+      display: block;
+    }
+
+    @keyframes dropdownSlideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .dropdown-item {
+      width: 100%;
+      height: 40px;
+      padding: 0 12px;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-sans);
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s ease;
+    }
+
+    .dropdown-item:hover {
+      background: var(--surface-subtle);
+      color: #0F172A;
+    }
+
+    .dropdown-item.danger {
+      color: var(--danger);
+    }
+
+    .dropdown-item.danger:hover {
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0;
+    }
+
     /* ── Toast Notifications ── */
     #toast-container {
       position: fixed;
@@ -1457,13 +1525,28 @@
           <div class="status-pulse"></div>
           <span>Active • 120ms</span>
         </div>
-        <button class="btn-auth" id="btn-user-auth" onclick="handleAuthAction()">
-          <span id="auth-avatar-container">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          </span>
-          <span id="auth-label">Sign In</span>
-          <span id="auth-role-badge"></span>
-        </button>
+        <div class="user-menu-container">
+          <button class="btn-auth" id="btn-user-auth" onclick="handleAuthAction()">
+            <span id="auth-avatar-container">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+            <span id="auth-label">Sign In</span>
+            <span id="auth-role-badge"></span>
+          </button>
+
+          <!-- User Menu Dropdown (Profile & Logout) -->
+          <div class="user-dropdown-menu" id="user-dropdown-menu">
+            <button class="dropdown-item" onclick="openProfileModal()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>User Profile</span>
+            </button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item danger" onclick="handleSignOut()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </div>
       </div>
     </header>
   </div>
@@ -2087,6 +2170,54 @@
     </div>
   </div>
 
+    <!-- ═════════════════════════════════════════════════════════ -->
+  <!-- USER PROFILE MODAL (PREMIUM STUDIO VIEW)                  -->
+  <!-- ═════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="profile-modal">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 style="font-size: 19px; font-weight: 800; color: #0F172A;">Account Profile</h3>
+        <button class="modal-close-btn" onclick="closeProfileModal()" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="profile-card-body" style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 10px 0 10px;">
+        <div style="position: relative; margin-bottom: 14px;">
+          <img id="profile-modal-avatar" src="/ownerpic.png" alt="Profile Picture" style="width: 86px; height: 86px; border-radius: 50%; object-fit: cover; border: 3px solid #2563EB; box-shadow: 0 4px 14px rgba(37,99,235,0.2);">
+        </div>
+
+        <h4 id="profile-modal-name" style="font-size: 20px; font-weight: 800; color: #0F172A; margin-bottom: 4px;">User Name</h4>
+        <div id="profile-modal-email" style="font-size: 14px; color: var(--text-secondary); margin-bottom: 12px;">user@example.com</div>
+        <div id="profile-modal-role" class="role-badge user" style="margin-bottom: 20px;">USER</div>
+
+        <div style="width: 100%; background: var(--surface-subtle); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; text-align: left; font-size: 13px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--text-tertiary);">Authentication:</span>
+            <span id="profile-modal-provider" style="font-weight: 600; color: #0F172A;">Google Auth</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--text-tertiary);">Account Status:</span>
+            <span style="color: var(--accent-green); font-weight: 600;">Active Verified</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--text-tertiary);">System Role:</span>
+            <span id="profile-modal-role-label" style="font-weight: 600; color: #0F172A;">Standard User</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--text-tertiary);">User ID:</span>
+            <span id="profile-modal-uid" style="font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary);">uid</span>
+          </div>
+        </div>
+
+        <div style="width: 100%; display: flex; gap: 12px; margin-top: 22px;">
+          <button class="btn-create" onclick="closeProfileModal()" style="flex: 1; background: var(--surface-subtle); color: #0F172A; border: 1px solid var(--border);">Close</button>
+          <button class="btn-create" onclick="closeProfileModal(); handleSignOut();" style="flex: 1; background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(220,38,38,0.2);">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="toast-container"></div>
 
   <!-- ═════════════════════════════════════════════════════════ -->
@@ -2257,17 +2388,10 @@
           const userDocRef = db.collection('users').doc(user.uid);
           const snap = await userDocRef.get();
 
-          if (!snap.exists) {
-            await userDocRef.set({
-              email: user.email,
-              displayName: user.displayName || user.email.split('@')[0],
-              photoURL: user.photoURL || '',
-              role: 'user',
-              createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            currentUserRole = 'user';
-          } else {
+          if (snap.exists) {
             currentUserRole = snap.data().role || 'user';
+          } else {
+            currentUserRole = 'user';
           }
         } catch (err) {
           currentUserRole = 'user';
@@ -2540,15 +2664,79 @@
       }
     }
 
+    // ── Dropdown & Profile Modal Handlers ──
     function handleAuthAction() {
       if (currentUser) {
-        if (confirm(`Signed in as ${currentUser.email}. Do you want to sign out?`)) {
-          auth.signOut().then(() => {
-            showToast('Signed out successfully');
-          });
-        }
+        toggleUserDropdown();
       } else {
         openAuthModal();
+      }
+    }
+
+    function toggleUserDropdown() {
+      const menu = document.getElementById('user-dropdown-menu');
+      if (menu) {
+        menu.classList.toggle('show');
+      }
+    }
+
+    function closeUserDropdown() {
+      const menu = document.getElementById('user-dropdown-menu');
+      if (menu) {
+        menu.classList.remove('show');
+      }
+    }
+
+    // Close dropdown on click outside
+    window.addEventListener('click', (e) => {
+      const container = document.querySelector('.user-menu-container');
+      if (container && !container.contains(e.target)) {
+        closeUserDropdown();
+      }
+    });
+
+    function openProfileModal() {
+      closeUserDropdown();
+      if (!currentUser) return;
+
+      const avatar = document.getElementById('profile-modal-avatar');
+      const name = document.getElementById('profile-modal-name');
+      const email = document.getElementById('profile-modal-email');
+      const role = document.getElementById('profile-modal-role');
+      const roleLabel = document.getElementById('profile-modal-role-label');
+      const provider = document.getElementById('profile-modal-provider');
+      const uid = document.getElementById('profile-modal-uid');
+
+      if (avatar) avatar.src = currentUser.photoURL || '/ownerpic.png';
+      if (name) name.textContent = currentUser.displayName || currentUser.email.split('@')[0];
+      if (email) email.textContent = currentUser.email;
+      if (role) {
+        role.className = `role-badge ${currentUserRole}`;
+        role.textContent = currentUserRole.toUpperCase();
+      }
+      if (roleLabel) {
+        roleLabel.textContent = currentUserRole === 'admin' ? 'Administrator' : 'Standard User';
+      }
+      if (provider) {
+        const isGoogle = currentUser.providerData.some(p => p.providerId === 'google.com');
+        provider.textContent = isGoogle ? 'Google Account' : 'Email & Password';
+      }
+      if (uid) uid.textContent = currentUser.uid;
+
+      document.getElementById('profile-modal').style.display = 'flex';
+    }
+
+    function closeProfileModal() {
+      document.getElementById('profile-modal').style.display = 'none';
+    }
+
+    async function handleSignOut() {
+      closeUserDropdown();
+      try {
+        await auth.signOut();
+        showToast('Signed out successfully.');
+      } catch (err) {
+        showToast('Error signing out.');
       }
     }
 
@@ -2572,6 +2760,7 @@
       document.getElementById('btn-submit-text').textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
     }
 
+    // ── Google Authentication (Strict Sign In vs Create Account) ──
     async function handleGoogleSignIn() {
       if (!checkClientRateLimit()) return;
       showAuthError('');
@@ -2583,9 +2772,52 @@
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.setCustomParameters({ prompt: 'select_account' });
         const result = await auth.signInWithPopup(provider);
-        resetAuthFailures();
-        closeAuthModal();
-        showToast(`Welcome back, ${result.user.displayName || result.user.email}!`);
+        const user = result.user;
+
+        // Check user existence in Firestore
+        const userDocRef = db.collection('users').doc(user.uid);
+        const snap = await userDocRef.get();
+
+        if (authMode === 'signin') {
+          // SIGN IN MODE: User MUST already have an account!
+          if (!snap.exists) {
+            // No account found! Sign out immediately and inform user
+            await auth.signOut();
+            showAuthError('No user account found with this Google account. Please click "Create Account" above to register.');
+            setAuthMode('signup');
+            return;
+          }
+
+          // User exists: Welcome back!
+          resetAuthFailures();
+          closeAuthModal();
+          const name = snap.data().displayName || user.displayName || user.email.split('@')[0];
+          showToast(`Welcome back, ${name}!`);
+
+        } else {
+          // CREATE ACCOUNT MODE:
+          if (snap.exists) {
+            // Already registered
+            resetAuthFailures();
+            closeAuthModal();
+            const name = snap.data().displayName || user.displayName || user.email.split('@')[0];
+            showToast(`Welcome back, ${name}! (Account already registered)`);
+          } else {
+            // New user registration
+            await userDocRef.set({
+              email: user.email,
+              displayName: user.displayName || user.email.split('@')[0],
+              photoURL: user.photoURL || '',
+              role: 'user',
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            resetAuthFailures();
+            closeAuthModal();
+            const name = user.displayName || user.email.split('@')[0];
+            showToast(`Welcome, ${name}! Your account has been created.`);
+          }
+        }
+
       } catch (err) {
         recordAuthFailure();
         showAuthError(getFriendlyErrorMessage(err));
@@ -2594,6 +2826,7 @@
       }
     }
 
+    // ── Email/Password Authentication (Strict Sign In vs Create Account) ──
     async function handleEmailAuth(e) {
       e.preventDefault();
       if (!checkClientRateLimit()) return;
@@ -2630,19 +2863,33 @@
 
       try {
         if (authMode === 'signup') {
+          // CREATE ACCOUNT
           const res = await auth.createUserWithEmailAndPassword(emailCheck.value, passRaw);
+          await db.collection('users').doc(res.user.uid).set({
+            email: res.user.email,
+            displayName: res.user.email.split('@')[0],
+            photoURL: '',
+            role: 'user',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
           resetAuthFailures();
           closeAuthModal();
-          showToast(`Account successfully registered for ${res.user.email}!`);
+          showToast(`Welcome, ${res.user.email.split('@')[0]}! Your account has been created.`);
         } else {
+          // SIGN IN
           const res = await auth.signInWithEmailAndPassword(emailCheck.value, passRaw);
           resetAuthFailures();
           closeAuthModal();
-          showToast(`Signed in as ${res.user.email}`);
+          showToast(`Welcome back, ${res.user.displayName || res.user.email.split('@')[0]}!`);
         }
       } catch (err) {
         recordAuthFailure();
-        showAuthError(getFriendlyErrorMessage(err));
+        const code = err.code || '';
+        if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
+          showAuthError('No user account found with this email. Please click "Create Account" above to register.');
+        } else {
+          showAuthError(getFriendlyErrorMessage(err));
+        }
       } finally {
         submitBtn.disabled = false;
         submitText.textContent = authMode === 'signin' ? 'Sign In' : 'Create Account';
