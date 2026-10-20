@@ -2460,58 +2460,54 @@
       const adminNavBtn = document.getElementById('tab-btn-admin');
       const authLabel = document.getElementById('auth-label');
       const avatarContainer = document.getElementById('auth-avatar-container');
-      const roleBadge = document.getElementById('auth-role-badge');
 
       if (user) {
+        let dbRole = 'user';
         try {
           const userDocRef = db.collection('users').doc(user.uid);
           const snap = await userDocRef.get();
-
           if (snap.exists) {
-            currentUserRole = snap.data().role || 'user';
-          } else {
-            currentUserRole = 'user';
+            dbRole = (snap.data().role || 'user').toLowerCase();
           }
         } catch (err) {
-          currentUserRole = 'user';
+          console.warn('User doc query warning:', err);
         }
 
-        // Role is strictly read from Firestore database (no artificial override)
-        if (snap.exists) {
-          currentUserRole = (snap.data().role || 'user').toLowerCase();
-        } else {
-          currentUserRole = 'user';
+        currentUserRole = dbRole;
+        const name = user.displayName || user.email.split('@')[0] || 'User';
+        if (authLabel) authLabel.textContent = name;
+
+        if (avatarContainer) {
+          if (user.photoURL) {
+            avatarContainer.innerHTML = `<img src="${user.photoURL}" class="user-avatar" alt="Avatar">`;
+          } else {
+            avatarContainer.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+          }
         }
 
-        const name = user.displayName || user.email.split('@')[0];
-        authLabel.textContent = name;
-        // role badge removed from nav button
-        // role badge text removed from nav button
-
-        if (user.photoURL) {
-          avatarContainer.innerHTML = `<img src="${user.photoURL}" class="user-avatar" alt="Avatar">`;
-        } else {
-          avatarContainer.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
-        }
-
-        if (currentUserRole === 'admin') {
-          adminNavBtn.style.display = 'inline-flex';
-        } else {
-          adminNavBtn.style.display = 'none';
-          if (document.getElementById('view-admin').classList.contains('active')) {
-            switchTab('overview');
+        if (adminNavBtn) {
+          if (currentUserRole === 'admin') {
+            adminNavBtn.style.display = 'inline-flex';
+          } else {
+            adminNavBtn.style.display = 'none';
+            const adminView = document.getElementById('view-admin');
+            if (adminView && adminView.classList.contains('active')) {
+              switchTab('overview');
+            }
           }
         }
 
       } else {
+        currentUser = null;
         currentUserRole = 'user';
-        adminNavBtn.style.display = 'none';
-        authLabel.textContent = 'Sign In';
-        roleBadge.className = '';
-        roleBadge.textContent = '';
-        avatarContainer.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+        if (adminNavBtn) adminNavBtn.style.display = 'none';
+        if (authLabel) authLabel.textContent = 'Sign In';
+        if (avatarContainer) {
+          avatarContainer.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+        }
 
-        if (document.getElementById('view-admin').classList.contains('active')) {
+        const adminView = document.getElementById('view-admin');
+        if (adminView && adminView.classList.contains('active')) {
           switchTab('overview');
         }
       }
@@ -2748,9 +2744,13 @@
 
     // ── Dropdown & Profile Modal Handlers ──
     function handleAuthAction() {
-      if (currentUser) {
+      const authLabel = document.getElementById('auth-label');
+      const isSignIn = !authLabel || authLabel.textContent.trim() === 'Sign In';
+
+      if (currentUser && !isSignIn) {
         toggleUserDropdown();
       } else {
+        closeUserDropdown();
         openAuthModal();
       }
     }
