@@ -1577,10 +1577,7 @@
     <section class="tab-view active" id="view-overview">
       <div class="hero-container">
         <div>
-          <div class="hero-eyebrow">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            v1.7.0 Live • Realtime WebRTC Voice
-          </div>
+
           <h1 class="hero-title">
             The Autonomous Voice &<br><span>Desktop Intelligence.</span>
           </h1>
@@ -3107,60 +3104,73 @@
       const tbody = document.getElementById('keys-table-body');
       tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 24px; color: var(--text-tertiary);">Loading license directory...</td></tr>`;
 
+      let keysData = {};
+
+      // 1. Fetch directly from Firestore 'licenses' collection (all keys in Firestore)
+      try {
+        const snap = await db.collection('licenses').get();
+        if (!snap.empty) {
+          snap.forEach(doc => {
+            keysData[doc.id] = doc.data();
+          });
+        }
+      } catch (err) {
+        console.warn('Firestore licenses query warning:', err);
+      }
+
+      // 2. Fetch from /api/keys to merge with local/edge KV registry
       try {
         const res = await fetch(`${API_BASE}/api/keys`, {
           headers: { 'Authorization': `Bearer ${ADMIN_TOKEN}` }
         });
-
-        if (!res.ok) {
-          tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 24px; color: var(--danger);">Admin authentication required.</td></tr>`;
-          return;
+        if (res.ok) {
+          const apiData = await res.json();
+          keysData = { ...apiData, ...keysData };
         }
+      } catch (e) {}
 
-        const data = await res.json();
-        const keys = Object.keys(data);
+      const keys = Object.keys(keysData);
 
-        if (keys.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 24px; color: var(--text-tertiary);">No license keys generated yet.</td></tr>`;
-          return;
-        }
-
-        tbody.innerHTML = keys.map(k => {
-          const item = data[k];
-          const isActive = item.active !== false;
-          return `
-            <tr>
-              <td>
-                <span class="key-badge">
-                  <code>${k}</code>
-                  <button class="btn-action-sm" onclick="copyKeyText('${k}')" style="padding: 2px 6px;">Copy</button>
-                </span>
-              </td>
-              <td style="font-weight: 600; color: #0F172A;">${item.client || 'Unknown Client'}</td>
-              <td>${item.plan || 'Lifetime Pro'}</td>
-              <td style="font-family: var(--font-mono); font-size: 12px;">${item.created_at || '2026'}</td>
-              <td>
-                <span class="badge-status ${isActive ? 'active' : 'revoked'}">
-                  ${isActive ? 'Active' : 'Revoked'}
-                </span>
-              </td>
-              <td style="text-align: right;">
-                <button class="btn-action-sm" onclick="toggleKey('${k}', ${!isActive})">
-                  ${isActive ? 'Revoke' : 'Activate'}
-                </button>
-                <button class="btn-action-sm danger" onclick="deleteKey('${k}')" style="margin-left: 6px;">
-                  Delete
-                </button>
-              </td>
-            </tr>
-          `;
-        }).join('');
-
-        loadStats();
-    initSEORouter();
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 24px; color: var(--danger);">Failed to connect to license server.</td></tr>`;
+      if (keys.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 24px; color: var(--text-tertiary);">No license keys generated yet.</td></tr>`;
+        return;
       }
+
+      tbody.innerHTML = keys.map(k => {
+        const item = keysData[k] || {};
+        const isActive = item.active !== false;
+        const clientName = item.client || item.clientName || 'Unknown Client';
+        const plan = item.plan || 'Lifetime Pro';
+        const date = item.created_at || item.createdAt || '2026';
+        return `
+          <tr>
+            <td>
+              <span class="key-badge">
+                <code>${k}</code>
+                <button class="btn-action-sm" onclick="copyKeyText('${k}')" style="padding: 2px 6px;">Copy</button>
+              </span>
+            </td>
+            <td style="font-weight: 600; color: #0F172A;">${clientName}</td>
+            <td>${plan}</td>
+            <td style="font-family: var(--font-mono); font-size: 12px;">${date}</td>
+            <td>
+              <span class="badge-status ${isActive ? 'active' : 'revoked'}">
+                ${isActive ? 'Active' : 'Revoked'}
+              </span>
+            </td>
+            <td style="text-align: right;">
+              <button class="btn-action-sm" onclick="toggleKey('${k}', ${!isActive})">
+                ${isActive ? 'Revoke' : 'Activate'}
+              </button>
+              <button class="btn-action-sm danger" onclick="deleteKey('${k}')" style="margin-left: 6px;">
+                Delete
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      loadStats();
     }
 
     async function handleCreateKey(e) {
@@ -3178,23 +3188,35 @@
       submitBtn.disabled = true;
 
       try {
-        const res = await fetch(`${API_BASE}/api/keys`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${ADMIN_TOKEN}`
-          },
-          body: JSON.stringify({ action: 'create', client: clientCheck.value, plan })
-        });
+        const seg = () => Math.random().toString(36).substring(2, 6).toUpperCase();
+        const newKey = `ZORA-${seg()}-${seg()}-${seg()}`;
+        const newRecord = {
+          client: clientCheck.value,
+          plan: plan || 'Lifetime Pro',
+          active: true,
+          created_at: new Date().toLocaleDateString('en-GB')
+        };
 
-        const data = await res.json();
-        if (data.success) {
-          showToast(`License created: ${data.key}`);
-          document.getElementById('input-client-name').value = '';
-          loadKeys();
-        } else {
-          showToast(`Error: ${data.error || 'Failed to create key'}`);
-        }
+        // 1. Write directly to Firestore 'licenses'
+        try {
+          await db.collection('licenses').doc(newKey).set(newRecord);
+        } catch (e) {}
+
+        // 2. Also dispatch to backend API
+        try {
+          await fetch(`${API_BASE}/api/keys`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${ADMIN_TOKEN}`
+            },
+            body: JSON.stringify({ action: 'create', client: clientCheck.value, plan })
+          });
+        } catch (e) {}
+
+        showToast(`License created: ${newKey}`);
+        document.getElementById('input-client-name').value = '';
+        loadKeys();
       } catch (err) {
         showToast('Network error generating license');
       } finally {
@@ -3204,7 +3226,10 @@
 
     async function toggleKey(key, active) {
       try {
-        const res = await fetch(`${API_BASE}/api/keys`, {
+        try {
+          await db.collection('licenses').doc(key).update({ active: active });
+        } catch (e) {}
+        await fetch(`${API_BASE}/api/keys`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -3222,7 +3247,10 @@
     async function deleteKey(key) {
       if (!confirm(`Are you sure you want to permanently delete license ${key}?`)) return;
       try {
-        const res = await fetch(`${API_BASE}/api/keys`, {
+        try {
+          await db.collection('licenses').doc(key).delete();
+        } catch (e) {}
+        await fetch(`${API_BASE}/api/keys`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
