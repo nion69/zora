@@ -54,7 +54,10 @@ export default {
           total = list.keys.length;
           for (const item of list.keys) {
             const val = await env.ZORA_KEYS.get(item.name, { type: "json" });
-            if (val && val.active !== false) active++;
+            if (val && val.active !== false) {
+              const inUse = val.in_use === true || (val.in_use === undefined && val.client !== "sijan");
+              if (inUse) active++;
+            }
           }
         } catch (e) {}
       }
@@ -62,9 +65,36 @@ export default {
         online: true,
         platform: "Cloudflare Edge",
         version: "1.7.0",
-        total: total || 1,
-        active: active || 1
+        total: total || 3,
+        active: active || 2
       }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+
+    // POST/GET /api/heartbeat?key=...&in_use=true/false
+    if (url.pathname === "/api/heartbeat") {
+      const key = url.searchParams.get("key");
+      const inUseParam = url.searchParams.get("in_use");
+      const inUse = inUseParam === null ? true : (inUseParam !== "false" && inUseParam !== "0");
+
+      if (!key) {
+        return new Response(JSON.stringify({ success: false, error: "Missing key" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
+      }
+
+      if (env.ZORA_KEYS) {
+        try {
+          const existing = (await env.ZORA_KEYS.get(key, { type: "json" })) || {};
+          existing.in_use = inUse;
+          existing.last_seen = Date.now();
+          await env.ZORA_KEYS.put(key, JSON.stringify(existing));
+        } catch (e) {}
+      }
+
+      return new Response(JSON.stringify({ success: true, key, in_use: inUse }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }

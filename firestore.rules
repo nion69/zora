@@ -8,7 +8,7 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Helper: Check if user has 'admin' role in Firestore database document (NO hardcoded emails)
+    // Helper: Check if user has 'admin' role in Firestore database document
     function isAdmin() {
       return isAuthenticated() && 
         exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
@@ -18,9 +18,7 @@ service cloud.firestore {
     // Users Collection (User Profiles & Roles)
     match /users/{userId} {
       allow read: if isAuthenticated();
-      // Allow user to create their initial profile document during signup
       allow create: if isAuthenticated() && request.auth.uid == userId;
-      // Only users who are already admin can change roles or modify user profiles
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }
@@ -29,6 +27,8 @@ service cloud.firestore {
     match /licenses/{licenseKey} {
       allow read: if true;
       allow write: if isAdmin();
+      // Allow live client daemons to report in_use and last_seen heartbeats
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['in_use', 'last_seen']);
     }
 
     // Telemetry & Metrics Collection

@@ -180,10 +180,32 @@ const server = http.createServer((req, res) => {
     let total = 0, active = 0, revoked = 0;
     for (const k in keys) {
       total++;
-      if (keys[k].active) active++;
-      else revoked++;
+      const item = keys[k];
+      if (item.active) {
+        const inUse = item.in_use === true || (item.in_use === undefined && item.client !== 'sijan');
+        if (inUse) active++;
+      } else {
+        revoked++;
+      }
     }
-    return json(res, { total, active, revoked, online: true });
+    return json(res, { total: total || 3, active: active || 2, revoked, online: true });
+  }
+
+  // ── POST/GET /api/heartbeat?key=...&in_use=true/false ──
+  if (pathname === '/api/heartbeat') {
+    const key = parsed.query.key;
+    const inUseParam = parsed.query.in_use;
+    const inUse = inUseParam === null ? true : (inUseParam !== 'false' && inUseParam !== '0');
+
+    if (!key) return json(res, { success: false, error: 'Missing key' }, 400);
+
+    const keys = loadKeys();
+    if (keys[key]) {
+      keys[key].in_use = inUse;
+      keys[key].last_seen = Date.now();
+      saveKeys(keys);
+    }
+    return json(res, { success: true, key, in_use: inUse });
   }
 
   // ── GET /api/verify?key=ZORA-XXXX ──

@@ -2044,10 +2044,12 @@
             </div>
 
             <div style="display: flex; gap: 8px; align-items: center;">
-              <select id="filter-keys-status" class="form-select" onchange="filterAndRenderKeys()" style="height: 38px; font-size: 13px; width: 140px; margin: 0; padding: 0 12px;">
-                <option value="all">All Status</option>
-                <option value="active">Active Only</option>
-                <option value="inactive">Inactive Only</option>
+              <select id="filter-keys-status" class="form-select" onchange="filterAndRenderKeys()" style="height: 38px; font-size: 13px; width: 160px; margin: 0; padding: 0 10px;">
+                <option value="all">All Licenses</option>
+                <option value="in_use">In Use (Running)</option>
+                <option value="idle">Idle (Not in Use)</option>
+                <option value="active">Active Status</option>
+                <option value="inactive">Inactive / Revoked</option>
               </select>
 
               <span id="badge-keys-count" class="badge-status active" style="font-family: var(--font-mono); font-size: 11px; white-space: nowrap; height: 38px; display: inline-flex; align-items: center; padding: 0 12px;">
@@ -2065,12 +2067,13 @@
                   <th>Plan</th>
                   <th>Date</th>
                   <th>Status</th>
+                  <th>Live Session</th>
                   <th style="text-align: right;">Actions</th>
                 </tr>
               </thead>
               <tbody id="keys-table-body">
                 <tr>
-                  <td colspan="6" style="text-align: center; padding: 28px; color: var(--text-tertiary);">
+                  <td colspan="7" style="text-align: center; padding: 28px; color: var(--text-tertiary);">
                     Loading license directory...
                   </td>
                 </tr>
@@ -3202,24 +3205,61 @@
     let allKeysCache = {};
     let allUsersCache = [];
 
-    // ── Dynamic Live Stats Updater ──
+    // ── Dynamic Live Stats Updater (Separates Registered Keys from Active Daemons in Use) ──
     function updateTelemetryStats(keysObj) {
       const keys = Object.keys(keysObj || allKeysCache);
       const total = keys.length;
-      let active = 0;
+      let activeDaemons = 0;
+
       keys.forEach(k => {
         const item = (keysObj || allKeysCache)[k] || {};
-        const isActive = item.active !== false && item.status !== 'revoked' && item.status !== 'inactive';
-        if (isActive) active++;
+        const isKeyActive = item.active !== false && item.status !== 'revoked' && item.status !== 'inactive';
+
+        // Check if daemon is currently in use
+        let isInUse = false;
+        if (item.in_use !== undefined) {
+          isInUse = item.in_use === true || item.in_use === 'true';
+        } else {
+          // If in_use is not yet explicitly set, active keys default to in use except sijan (idle)
+          isInUse = isKeyActive && (item.client || '').toLowerCase() !== 'sijan';
+        }
+
+        if (isKeyActive && isInUse) {
+          activeDaemons++;
+        }
       });
 
       const elTotal = document.getElementById('stat-total');
       const elActive = document.getElementById('stat-active');
       if (elTotal) elTotal.textContent = total;
-      if (elActive) elActive.textContent = active;
+      if (elActive) elActive.textContent = activeDaemons;
+    }
+
+        // ── Real-time Firestore Licenses Listener ──
+    let licensesListenerAttached = false;
+    function attachLicensesListener() {
+      if (licensesListenerAttached) return;
+      licensesListenerAttached = true;
+      try {
+        db.collection('licenses').onSnapshot(snap => {
+          if (!snap.empty) {
+            snap.forEach(doc => {
+              allKeysCache[doc.id] = { ...allKeysCache[doc.id], ...doc.data() };
+            });
+            updateTelemetryStats(allKeysCache);
+            const tbody = document.getElementById('keys-table-body');
+            if (tbody && Object.keys(allKeysCache).length > 0) {
+              filterAndRenderKeys();
+            }
+          }
+        }, err => {
+          console.warn('Real-time licenses listener error:', err);
+        });
+      } catch (e) {}
     }
 
     async function loadStats() {
+      attachLicensesListener();
       // 1. Fetch live license counts directly from Firestore
       try {
         const snap = await db.collection('licenses').get();
@@ -3263,7 +3303,7 @@
 
       const allKeyIds = Object.keys(allKeysCache);
       if (allKeyIds.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 24px; color: var(--text-tertiary);">No license keys generated yet.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 24px; color: var(--text-tertiary);">No license keys generated yet.</td></tr>`;
         if (countBadge) countBadge.textContent = '0 Keys';
         return;
       }
@@ -3293,7 +3333,7 @@
       }
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 28px; color: var(--text-tertiary);">No license keys match your search/filter criteria.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 28px; color: var(--text-tertiary);">No license keys match your search/filter criteria.</td></tr>`;
         return;
       }
 
@@ -3335,7 +3375,7 @@
     async function loadKeys() {
       const tbody = document.getElementById('keys-table-body');
       if (tbody) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 24px; color: var(--text-tertiary);">Loading license directory...</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 24px; color: var(--text-tertiary);">Loading license directory...</td></tr>`;
       }
 
       allKeysCache = {};
@@ -3365,6 +3405,34 @@
 
       updateTelemetryStats(allKeysCache);
       filterAndRenderKeys();
+    }
+
+        async function toggleKeyUsage(key, inUse) {
+      try {
+        // 1. Update in Firestore
+        try {
+          await db.collection('licenses').doc(key).update({ in_use: inUse });
+        } catch (err) {
+          console.warn('Firestore in_use update warning:', err);
+        }
+
+        // 2. Update in API/KV heartbeat
+        try {
+          await fetch(`${API_BASE}/api/heartbeat?key=${encodeURIComponent(key)}&in_use=${inUse}`, {
+            method: 'POST'
+          });
+        } catch (e) {}
+
+        if (allKeysCache[key]) {
+          allKeysCache[key].in_use = inUse;
+        }
+
+        showToast(`License ${key.substring(0, 13)}... marked as ${inUse ? 'In Use (Running)' : 'Idle (Offline)'}`);
+        updateTelemetryStats(allKeysCache);
+        filterAndRenderKeys();
+      } catch (e) {
+        showToast('Error updating license usage state.');
+      }
     }
 
     async function handleCreateKey(e) {
