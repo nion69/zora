@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.whl
+*.tar.gz
+*.pid
+*.log
+backup_working/
+.env

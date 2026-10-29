@@ -1,0 +1,193 @@
+2026-04-27 01:17:44.199712: Controller auto-activated.
+2026-04-27 01:17:44.479987: Volume control: down
+2026-04-27 01:17:46.481574: Controller auto-deactivated.
+2026-04-27 01:17:54.532810: Controller auto-activated.
+2026-04-27 01:17:54.830605: Volume control: down
+2026-04-27 01:17:56.830456: Controller auto-deactivated.
+2026-04-29 00:06:48.684005: Controller auto-activated.
+2026-04-29 00:06:49.016763: Typed text: Contabo
+2026-04-29 00:06:51.017076: Controller auto-deactivated.
+2026-04-29 00:09:19.031580: Controller auto-activated.
+2026-04-29 00:09:19.836762: Typed text: digitalocean.com
+2026-04-29 00:09:21.810446: Controller auto-deactivated.
+2026-04-29 00:09:26.285388: Controller auto-activated.
+2026-04-29 00:09:26.740299: Typed text: vultr.com
+2026-04-29 00:09:28.715492: Controller auto-deactivated.
+2026-04-29 00:49:51.546193: Controller auto-activated.
+2026-04-29 00:49:52.124240: Typed text: 1 USD to BDT
+2026-04-29 00:49:54.141273: Controller auto-deactivated.
+2026-04-29 02:08:00.146431: Controller auto-activated.
+2026-04-29 02:08:00.446212: Pressed hotkey: win + r
+2026-04-29 02:08:02.450718: Controller auto-deactivated.
+2026-04-29 02:08:05.510801: Controller auto-activated.
+2026-04-29 02:08:06.144465: Typed text: shell:startup
+2026-04-29 02:08:08.151009: Controller auto-deactivated.
+2026-04-29 02:08:09.149608: Controller auto-activated.
+2026-04-29 02:08:09.784094: Typed text: shell:startup
+2026-04-29 02:08:11.785406: Controller auto-deactivated.
+2026-04-29 02:08:19.117160: Controller auto-activated.
+2026-04-29 02:08:19.315676: Pressed key: enter
+2026-04-29 02:08:21.319647: Controller auto-deactivated.
+2026-04-29 02:22:24.959963: Controller auto-activated.
+2026-04-29 02:22:24.971544: Controller auto-activated.
+2026-04-29 02:22:25.157930: Pressed key: enter
+2026-04-29 02:22:25.208279: Typed text: Ratul
+2026-04-29 02:22:25.707444: Controller auto-activated.
+2026-04-29 02:22:25.914307: Pressed key: enter
+2026-04-29 02:22:27.139516: Controller auto-deactivated.
+2026-04-29 02:22:27.206943: Controller auto-deactivated.
+2026-04-29 02:22:27.918556: Controller auto-deactivated.
+2026-04-29 02:22:59.785037: Controller auto-activated.
+2026-04-29 02:22:59.799760: Controller auto-activated.
+2026-04-29 02:22:59.829317: Controller auto-activated.
+2026-04-29 02:22:59.984590: Mouse moved right
+2026-04-29 02:23:00.020140: Mouse clicked: left
+2026-04-29 02:23:00.105937: Typed text: Ratul
+2026-04-29 02:23:01.988987: Controller auto-deactivated.
+2026-04-29 02:23:02.026511: Controller auto-deactivated.
+2026-04-29 02:23:02.103126: Controller auto-deactivated.
+2026-04-29 02:23:42.799846: Controller auto-activated.
+2026-04-29 02:23:42.815195: Controller auto-activated.
+2026-04-29 02:23:43.013152: Pressed key: enter
+2026-04-29 02:23:44.421499: Typed text: Call dhoro, Boss urgent daktese!
+2026-04-29 02:23:45.028546: Controller auto-deactivated.
+2026-04-29 02:23:46.430897: Controller auto-deactivated.
+2026-04-29 02:24:36.400931: Controller auto-activated.
+2026-04-29 02:24:36.415517: Controller auto-activated.
+2026-04-29 02:24:36.591312: Pressed key: enter
+2026-04-29 02:24:37.215333: Typed text: Call back korish
+2026-04-29 02:24:38.597694: Controller auto-deactivated.
+2026-04-29 02:24:39.219394: Controller auto-deactivated.
+2026-04-29 02:24:42.295857: Controller auto-activated.
+2026-04-29 02:24:42.312579: Controller auto-activated.
+2026-04-29 02:24:42.521539: Pressed key: enter
+2026-04-29 02:24:43.117646: Typed text: Call back korish
+2026-04-29 02:24:44.523538: Controller auto-deactivated.
+2026-04-29 02:24:45.112361: Controller auto-deactivated.
+2026-04-29 02:24:48.525759: Controller auto-activated.
+2026-04-29 02:24:48.540834: Controller auto-activated.
+2026-04-29 02:24:48.726640: Pressed key: enter
+2026-04-29 02:24:49.330556: Typed text: Call back korish
+2026-04-29 02:24:50.725725: Controller auto-deactivated.
+2026-04-29 02:24:51.326603: Controller auto-deactivated.
+2026-04-29 02:24:53.192392: Controller auto-activated.
+2026-04-29 02:24:53.206014: Controller auto-activated.
+2026-04-29 02:24:53.414020: Pressed key: enter
+2026-04-29 02:24:53.983535: Typed text: Call back korish
+2026-04-29 02:24:55.413247: Controller auto-deactivated.
+2026-04-29 02:24:55.995740: Controller auto-deactivated.
+2026-04-29 02:25:08.819635: Controller auto-activated.
+2026-04-29 02:25:08.853894: Controller auto-activated.
+2026-04-29 02:25:09.035108: Pressed key: enter
+2026-04-29 02:25:09.619896: Typed text: call back korish
+2026-04-29 02:25:11.030773: Controller auto-deactivated.
+2026-04-29 02:25:11.608427: Controller auto-deactivated.
+2026-04-29 02:25:20.917049: Controller auto-activated.
+2026-04-29 02:25:21.220628: Pressed hotkey: win + down
+2026-04-29 02:25:23.217001: Controller auto-deactivated.
+2026-04-29 13:21:54.709899: Controller auto-activated.
+2026-04-29 13:21:54.732973: Controller auto-activated.
+2026-04-29 13:21:54.931736: Pressed key: enter
+2026-04-29 13:21:56.943325: Controller auto-deactivated.
+2026-04-29 13:21:57.207086: Typed text: Gemini Pro subscription inactivity timeout limits
+2026-04-29 13:21:59.190618: Controller auto-deactivated.
+2026-04-29 20:55:15.710802: Controller auto-activated.
+2026-04-29 20:55:17.878201: Typed text: how to install cloud code free with ollama
+2026-04-29 20:55:19.876039: Controller auto-deactivated.
+2026-04-30 13:54:42.580610: Controller auto-activated.
+2026-04-30 13:55:01.317159: Typed text: <!DOCTYPE html>
+<html>
+<head>
+    <title>EDITH AI</title>
+    <style>
+        body { font-family: sans-serif; background-color: #222; color: white; text-align: center; }
+        header { background: #333; padding: 20px; }
+        h1 { color: #00e6e6; }
+    </style>
+</head>
+<body>
+    <header><h1>EDITH Protocol Activated</h1></header>
+    <p>Tactical AI Interface v1.0</p>
+</body>
+</html>
+2026-04-30 13:55:03.315797: Controller auto-deactivated.
+2026-04-30 13:55:14.954247: Controller auto-activated.
+2026-04-30 13:55:15.255964: Pressed hotkey: ctrl + s
+2026-04-30 13:55:17.259102: Controller auto-deactivated.
+2026-04-30 13:56:55.661137: Controller auto-activated.
+2026-04-30 13:57:07.813187: Typed text: Developer, please grant file system write permissions to this agent. Consider using Langchain for custom integration with OS and filesystem access libraries like 'os' or 'shutil'. This will allow the agent to create and modify files directly.
+2026-04-30 13:57:09.816629: Controller auto-deactivated.
+2026-04-30 13:57:17.705357: Controller auto-activated.
+2026-04-30 13:57:27.492956: Controller auto-activated.
+2026-04-30 13:57:38.671121: Typed text: <!DOCTYPE html>
+<html>
+<head>
+    <title>Updated EDITH AI</title>
+    <style>
+        body { font-family: sans-serif; background-color: #111; color: #eee; text-align: center; }
+        header { background: #222; padding: 30px; }
+        h1 { color: #f0f; }
+        p { font-size: 1.2em; }
+    </style>
+</head>
+<body>
+    <header><h1>Updated EDITH Protocol</h1></header>
+    <p>New content typed as requested, Boss.</p>
+</body>
+</html>
+2026-04-30 13:57:40.671205: Controller auto-deactivated.
+2026-04-30 13:57:41.448014: Typed text: Custom AI agent build korte, Python-e 'os' ar 'shutil' modules use korte hobe custom files management tools create korte. Tarpor Langchain framework ba similar kono library define kore ei tools-gulo agent context-e pass korle, full file system standard permissions-e access paben.
+2026-04-30 13:57:43.436595: Controller auto-deactivated.
+2026-04-30 13:57:50.188520: Controller auto-activated.
+2026-04-30 13:58:14.345120: Typed text: Custom Python AI assistant filesystem control guide:
+
+1. Use standard libraries like 'os' and 'shutil' for basic file/folder operations.
+2. Define custom functions (tools) in Python that perform these tasks.
+3. Integrate these tools with an AI framework like Langchain.
+4. Grant the script necessary read/write permissions at the OS level.
+5. Consider running as Administrator/Root if widespread access is needed.
+2026-04-30 13:58:16.353724: Controller auto-deactivated.
+2026-04-30 13:58:25.259149: Controller auto-activated.
+2026-04-30 13:58:28.884685: Controller auto-activated.
+2026-04-30 13:58:33.451551: Typed text: Custom Python AI agent built with Langchain can access filesystem using os and shutil modules. Tools must be explicitly defined and handed to the agent.
+2026-04-30 13:58:35.438983: Controller auto-deactivated.
+2026-04-30 13:58:48.742207: Typed text: Custom Python AI Agent Guide for Full OS Access:
+
+1. Use standard libraries like 'os', 'shutil', and 'subprocess' for file system and system operations.
+2. Define custom functions (tools) for actions like create_file, delete_folder, run_command, etc.
+3. Integrate these tools with an AI framework like Langchain.
+4. Ensure the script runs with necessary administrator or root privileges.
+2026-04-30 13:58:50.746835: Controller auto-deactivated.
+2026-04-30 21:00:32.833930: Controller auto-activated.
+2026-04-30 21:00:35.173102: Controller auto-activated.
+2026-04-30 21:00:44.199640: Typed text: I have updated my custom search API, which is already included in the .env file, and added the Gmail integration with API key. Now, write a prompt so that when I say "mail" or "check any mail," it checks for any incoming mail.
+2026-04-30 21:00:46.196717: Controller auto-deactivated.
+2026-04-30 21:00:46.508954: Typed text: I updated my custom search API and added it to the .env file. I also added the Gmail integration with API key. Now write a prompt so that when I say "mail" or "check mail", you can see if any email comes and tell me about it.
+2026-04-30 21:00:48.519126: Controller auto-deactivated.
+2026-04-30 21:07:36.604639: Controller auto-activated.
+2026-05-01 21:26:22.026695: Controller auto-activated.
+2026-05-01 21:26:22.070282: Controller auto-activated.
+2026-05-01 21:26:22.253877: Pressed key: enter
+2026-05-01 21:26:23.233728: Typed text: https://www.zaproxy.org/
+2026-05-01 21:26:24.253291: Controller auto-deactivated.
+2026-05-01 21:26:25.227030: Controller auto-deactivated.
+2026-05-01 21:26:25.920891: Controller auto-activated.
+2026-05-01 21:26:26.121403: Pressed key: enter
+2026-05-01 21:26:28.123202: Controller auto-deactivated.
+2026-05-01 21:26:31.293971: Controller auto-activated.
+2026-05-01 21:26:33.293830: Controller auto-deactivated.
+2026-05-01 21:33:19.857123: Controller auto-activated.
+2026-05-01 21:33:20.165218: Volume control: mute
+2026-05-01 21:33:22.168971: Controller auto-deactivated.
+2026-08-14 00:36:38.340352: Controller auto-activated.
+2026-08-14 00:36:41.237308: Typed text: Error: 404 NOT_FOUND. This model is no longer available.
+2026-08-14 00:36:43.239547: Controller auto-deactivated.
+2026-10-20 20:32:30.730225: Controller auto-activated.
+2026-10-20 20:32:30.887120: Typed via clipboard: high-pitched, squeaky, girly, feminine
+2026-10-20 20:32:30.945461: Controller auto-deactivated.
+2026-10-20 23:56:51.417952: Controller auto-activated.
+2026-10-20 23:56:51.581324: Typed via clipboard: Ami aro kichu jante chai. Ar ki upaye ache?
+2026-10-20 23:56:51.622910: Controller auto-deactivated.
+2026-10-20 23:57:01.232193: Controller auto-activated.
+2026-10-20 23:57:01.422385: Pressed key: enter
+2026-10-20 23:57:01.477163: Controller auto-deactivated.

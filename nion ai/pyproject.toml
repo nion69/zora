@@ -1,0 +1,77 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zoraai"
+version = "2.0.2"
+description = "Zora AI - Autonomous Voice & Everyday Work Assistant"
+readme = "readme.md"
+requires-python = ">=3.10"
+dependencies = [
+    "livekit-agents>=1.6.10",
+    "livekit-plugins-google>=1.6.10",
+    "livekit-plugins-noise-cancellation>=0.3.0",
+    "google-genai>=2.18.0",
+    "python-dotenv",
+    "edge-tts",
+    "pygame; python_version < '3.14'",
+    "pygame-ce; python_version >= '3.14'",
+    "yt-dlp",
+    "imageio-ffmpeg",
+    "requests",
+    "PyAutoGUI",
+    "pynput",
+    "duckduckgo-search",
+    "fuzzywuzzy",
+    "python-Levenshtein",
+    "pywin32",
+    "mss",
+    "pillow",
+    "langchain",
+    "langchain-google-genai",
+    "langchain-openai",
+    "google-api-python-client",
+    "google-auth-httplib2",
+    "google-auth-oauthlib",
+    "playwright",
+    "beautifulsoup4"
+]
+
+[project.scripts]
+zora = "agent:cli_main"
+
+[tool.setuptools]
+py-modules = [
+    "agent",
+    "nion_auth",
+    "nion_autonomous_todo",
+    "nion_browser_controller",
+    "nion_connect_mj_on_phone",
+    "nion_continuous_vision",
+    "nion_emotion_engine",
+    "nion_filesystem_agent",
+    "nion_file_opner",
+    "nion_gemini_browser_agent",
+    "nion_get_whether",
+    "nion_gmail_reader",
+    "nion_google_search",
+    "nion_keyboard_mouse_CTRL",
+    "nion_license_watcher",
+    "nion_memory_loop",
+    "nion_memory_store",
+    "nion_minecraft_setup",
+    "nion_music_player",
+    "nion_playwright_browser",
+    "nion_prompts",
+    "nion_scheduler",
+    "nion_sleep_mode",
+    "nion_social_messenger",
+    "nion_stonic_agent",
+    "nion_user_account_chat",
+    "nion_vision",
+    "nion_web_creator",
+    "nion_window_CTRL",
+    "nion_pc_health",
+    "nion_minecraft_order_manager"
+]
