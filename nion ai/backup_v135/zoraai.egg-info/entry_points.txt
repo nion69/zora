@@ -1,2 +1,0 @@
-[console_scripts]
-zora = agent:cli_main
