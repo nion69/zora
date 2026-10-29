@@ -176,8 +176,8 @@ class Assistant:
         selected_voice = get_voice()
         from google.genai import types
         aad = types.AutomaticActivityDetection(
-            silence_duration_ms=500,
-            prefix_padding_ms=20,
+            silence_duration_ms=800,
+            prefix_padding_ms=40,
         )
         input_cfg = types.RealtimeInputConfig(automatic_activity_detection=aad)
 
@@ -298,16 +298,23 @@ async def entrypoint(ctx: agents.JobContext):
                         else:
                             print(f"[Zora] Heard: {txt[:80]}")
                             # Auto-detect silent/sleep mode command directly from speech
-                            sleep_triggers = [
-                                "silent mode", "sailent mode", "sleep mode",
-                                "chup koro", "chup thako", "chup hoye jao",
-                                "shup koro", "shup thako",
-                                "mute koro", "mute hoye jao",
-                                "shuye poro", "shuye thako", "ghumiye poro",
-                                "go to sleep", "stay silent", "be quiet"
+                            # Requires explicit command or assistant name invocation to avoid false auto-mute
+                            explicit_sleep_phrases = [
+                                "silent mode on", "sailent mode on", "sleep mode on",
+                                "mute hoye jao", "chup hoye jao", "ghumiye poro",
+                                "go to sleep", "stay silent", "be quiet",
+                                ai_name + " chup koro", ai_name + " chup thako",
+                                ai_name + " mute koro", ai_name + " sleep mode",
+                                ai_name + " silent mode", "chup thako " + ai_name,
+                                "mute koro " + ai_name
                             ]
-                            if any(st in txt for st in sleep_triggers):
-                                print(f"[Zora] Speech directly triggered silent mode: '{txt}'")
+                            # Clean words check: ensure it's not just a casual word in a longer sentence
+                            words = txt.split()
+                            is_sleep_cmd = any(phrase in txt for phrase in explicit_sleep_phrases) or (
+                                len(words) <= 3 and any(w in ("mute", "chup", "silent") for w in words)
+                            )
+                            if is_sleep_cmd:
+                                print(f"[Zora] Speech directly verified silent mode command: '{txt}'")
                                 from nion_sleep_mode import set_sleeping
                                 set_sleeping(True, delayed_seconds=3.5)
                     except Exception as err:

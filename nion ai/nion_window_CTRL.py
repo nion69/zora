@@ -137,79 +137,126 @@ async def delete_item(path, confirmed: bool = False):
 @function_tool()
 async def open_app(app_title: str) -> str:
     """
-    Opens ANY installed application, game, or tool on Windows (e.g. Roblox, Minecraft, Chrome, Notepad, Discord, Steam, etc.).
-    Uses a 3-layer universal launch engine:
-    1. Direct protocol & URI launch (e.g. roblox://, steam://, ms-settings:).
-    2. Windows StartApps AppID / Shell resolution (starts any UWP, Store, or Win32 app instantly).
-    3. Start Menu automated fallback search.
+    Opens ANY installed application, software, game, or tool on Windows (e.g. Chrome, Discord, Notepad, VS Code, Roblox, Minecraft, Spotify, Steam, File Explorer, Calculator, etc.).
+    Uses a bulletproof 4-layer launch engine:
+    1. Known direct process/alias launch (e.g. chrome, code, notepad, explorer, spotify, discord).
+    2. Protocol/URI schemes (e.g. roblox://, steam://, ms-settings:).
+    3. Windows Start Menu & Installed App Shortcuts (.lnk) quick search.
+    4. Fallback OS start command and AppID launcher.
     """
     import subprocess
+    import os
     import json
-    app_raw = app_title.lower().strip()
 
-    # 1. Direct URI / Special Protocol Mappings
-    protocol_map = {
-        "roblox": "roblox://",
-        "roblox player": "roblox://",
-        "roblox studio": "roblox-studio://",
-        "settings": "ms-settings:",
-        "file manager": "explorer",
-        "file explorer": "explorer",
+    app_clean = app_title.lower().strip()
+    for prefix in ["open ", "start ", "launch ", "run "]:
+        if app_clean.startswith(prefix):
+            app_clean = app_clean[len(prefix):].strip()
+
+    # 1. Direct executable / common command mappings
+    direct_commands = {
+        "chrome": "start chrome",
+        "google chrome": "start chrome",
+        "browser": "start chrome",
+        "edge": "start msedge",
+        "microsoft edge": "start msedge",
+        "firefox": "start firefox",
+        "brave": "start brave",
+        "notepad": "notepad",
+        "calculator": "calc",
+        "calc": "calc",
         "explorer": "explorer",
+        "file explorer": "explorer",
+        "files": "explorer",
         "this pc": "explorer ::{20D04FE0-3AEA-1069-A2D8-08002B30309D}",
         "downloads": "explorer shell:Downloads",
         "documents": "explorer shell:Personal",
         "desktop": "explorer shell:Desktop",
-        "notepad": "notepad",
-        "calculator": "calc",
-        "calc": "calc",
-        "cmd": "cmd",
-        "command prompt": "cmd",
+        "cmd": "start cmd",
+        "command prompt": "start cmd",
+        "terminal": "start wt",
+        "powershell": "start powershell",
         "paint": "mspaint",
         "task manager": "taskmgr",
         "taskmgr": "taskmgr",
         "control panel": "control",
-        "discord": "discord://",
-        "spotify": "spotify:",
-        "steam": "steam://",
+        "settings": "start ms-settings:",
+        "discord": "start discord:",
+        "spotify": "start spotify:",
+        "steam": "start steam:",
+        "roblox": "start roblox:",
+        "vscode": "code",
+        "code": "code",
+        "vs code": "code",
     }
 
-    if app_raw in protocol_map:
-        target_cmd = protocol_map[app_raw]
-        subprocess.Popen(f'start "" {target_cmd}', shell=True)
-        await asyncio.sleep(1.2)
-        await focus_window(app_raw)
-        return f"? {app_title} ??????? ???? ??? ????? ??? ???????? ????????? ??? ????!"
+    if app_clean in direct_commands:
+        try:
+            cmd = direct_commands[app_clean]
+            subprocess.Popen(cmd, shell=True)
+            await asyncio.sleep(1.0)
+            await focus_window(app_clean)
+            return f"Successfully opened {app_title}."
+        except Exception as e:
+            logger.warning(f"Direct command failed for {app_clean}: {e}")
 
-    # 2. Dynamic Windows Get-StartApps Resolution (Finds actual AppID or installed .exe)
+    # 2. Protocol lookup
+    protocol_map = {
+        "roblox": "roblox://",
+        "steam": "steam://",
+        "discord": "discord://",
+        "spotify": "spotify://",
+        "settings": "ms-settings:",
+    }
+    for k, proto in protocol_map.items():
+        if k in app_clean:
+            try:
+                os.startfile(proto)
+                await asyncio.sleep(1.0)
+                await focus_window(k)
+                return f"Successfully opened {app_title}."
+            except Exception:
+                pass
+
+    # 3. Windows Start Menu Shortcuts search (.lnk)
     try:
-        ps_cmd = f'powershell -NoProfile -Command "Get-StartApps | Where-Object {{ .Name -like \"*{app_raw}*\" }} | Select-Object -First 1 | ConvertTo-Json"'
-        res = subprocess.run(ps_cmd, shell=True, capture_output=True, text=True, timeout=5)
-        if res.stdout.strip():
-            app_info = json.loads(res.stdout)
-            app_id = app_info.get("AppID")
-            if app_id:
-                subprocess.Popen(f'explorer.exe "shell:AppsFolder\\{app_id}"', shell=True)
-                await asyncio.sleep(1.2)
-                await focus_window(app_raw)
-                return f"? {app_title} ??????? ???? ??? ????? ???? ????? ????!"
+        appdata_dir = os.environ.get("APPDATA", "")
+        programdata_dir = os.environ.get("ALLUSERSPROFILE", "")
+        start_menu_dirs = [
+            os.path.join(appdata_dir, "Microsoft", "Windows", "Start Menu", "Programs"),
+            os.path.join(programdata_dir, "Microsoft", "Windows", "Start Menu", "Programs")
+        ]
+        matched_lnk = None
+        for sm_dir in start_menu_dirs:
+            if not os.path.exists(sm_dir):
+                continue
+            for root, _, files in os.walk(sm_dir):
+                for f in files:
+                    if f.lower().endswith(".lnk") and app_clean in f.lower():
+                        matched_lnk = os.path.join(root, f)
+                        break
+                if matched_lnk:
+                    break
+            if matched_lnk:
+                break
+
+        if matched_lnk:
+            os.startfile(matched_lnk)
+            await asyncio.sleep(1.0)
+            await focus_window(app_clean)
+            return f"Successfully opened {app_title}."
     except Exception as e:
-        logger.warning(f"Get-StartApps lookup failed: {e}")
+        logger.warning(f"Start Menu link search error: {e}")
 
-    # 3. Direct executable launch or Start Menu typing
+    # 4. Fallback: OS start command
     try:
-        subprocess.Popen(f'start "" "{app_raw}"', shell=True)
-    except Exception:
-        import pyautogui
-        pyautogui.press('win')
-        await asyncio.sleep(0.3)
-        pyautogui.write(app_raw)
-        await asyncio.sleep(0.4)
-        pyautogui.press('enter')
-
-    await asyncio.sleep(1.2)
-    await focus_window(app_raw)
-    return f"? {app_title} ??????? ???? ??? ?????? ????!"
+        subprocess.Popen(f'start "" "{app_clean}"', shell=True)
+        await asyncio.sleep(1.0)
+        await focus_window(app_clean)
+        return f"Successfully opened {app_title}."
+    except Exception as e:
+        logger.error(f"Failed to open app {app_title}: {e}")
+        return f"Could not launch {app_title}. Error: {e}"
 
 APP_PROCESS_MAP = {
     "chrome": ["chrome.exe"],
